@@ -6,6 +6,6 @@ model {
 	n <- N * a				# No. of kulan in area a
 			# Likelihood:
 	C ~ dpois(n)
-	
+
 }
 
