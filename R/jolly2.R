@@ -22,7 +22,7 @@ jolly2<-function(species_count, Transect_area, Z=Z){
   VarY=((N*(N-n))/n)*(S2y-2*R*Sxy+R^2*S2z)
   se<-sqrt(VarY)
   CL=se*stats::qt(0.95,n-1)
-  out<-data.frame("Estimate"=Y, "lower_CI"=Y-CL, "upper_CI"=Y+CL)
+  out<-data.frame("Estimate"=Y, "lower_CI"=Y-CL, "upper_CI"=Y+CL,"SE"= se,"mean.y"=mean(y),"SD.y"=stats::sd(y), "Coef.of.Var.y"=(stats::sd(y)/mean(y)))
   return(out)
 }
 
