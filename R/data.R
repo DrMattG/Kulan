@@ -1,5 +1,5 @@
-#' @title DATASET_TITLE
-#' @description DATASET_DESCRIPTION
+#' @title All Flight Right
+#' @description Dataset of drone flight
 #' @format A data frame with 12670 rows and 18 variables:
 #' \describe{
 #'   \item{\code{id}}{character COLUMN_DESCRIPTION}
