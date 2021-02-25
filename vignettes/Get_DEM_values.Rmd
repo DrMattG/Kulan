@@ -1,0 +1,108 @@
+---
+title: "Getting raster values form a Digital Elevation Model"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting raster values form a Digital Elevation Model}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(kableExtra)
+library(raster)
+library(sp)
+```
+
+In order to calculate the ground area that a drone has recorded we need to know the height of the drone. The internal altitude measurement may not be accurate. If this is the case you can use this script as a template to get the correct altitude from a Digital Elevation Model (known as a DEM). 
+
+First you will need to load the {Kulan} package and a few additional packages to help get the altitude from a DEM. 
+
+```{r setup}
+library(Kulan)
+```
+
+
+## Import flight file
+
+Then you need to import your flight file. You can use the inbuilt datasets in the package for this example. 
+
+```{r}
+df=Kulan::All_Flight_Left
+df %>% 
+  head() %>%
+  DT::datatable(options=list(scrollX = TRUE))
+```
+
+We need the dataframe to be formatted as an R data.frame in order to manipulate it later on.
+
+```{r}
+df <- as.data.frame(df)
+```
+
+## Create SpatialPoints
+
+Then we need to find the geographic projection of our dataset and we can create a spatial points dataframe. 
+
+```{r}
+prj_dd <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+dfsp <- sp::SpatialPoints(df[,c(5,4)], proj4string = sp::CRS(prj_dd)) #it needs to have Longitude first and Latitude second!!!!
+df_spdf <- sp::SpatialPointsDataFrame(Flight1_left, proj4string = sp::CRS(prj_dd), data = df)
+Flight1_left <- sp::SpatialPoints(dfsp, proj4string = sp::CRS(prj_dd))
+```
+
+## Import a Regional DEM model
+
+Now we need to import our regional DEM model. These are usually in the Raster format and we have included one in the package for use in examples. 
+
+```{r}
+DEM30_BK=Kulan::DEM30_BK
+```
+
+Next we need to see what the coordinate system of the DEM model is: 
+
+```{r}
+raster::crs(DEM30_BK)
+
+```
+
+Then we can plot it and see if our points overlay the model (if you are using many different DEMs you might sometimes load the wrong one)
+
+```{r}
+plot(DEM30_BK, col= terrain.colors(n=15, alpha=1, rev=FALSE))
+points(df_spdf$Lon_dec,df_spdf$Lat_dec,cex=0.5,pch=15) #plot points based on long/lat
+
+```
+
+## Extract raster values to points
+The final step is to extract the raster values to the points so that you get a altitude value for each of the locations in the flight datset
+
+```{r}
+
+cord.UTM <- spTransform(df_spdf, crs(DEM30_BK))
+df_spdf$DEM_ex <- extract(DEM30_BK, Flight1_left@coords, sp = T)
+df_spdf %>% 
+  head() %>% 
+  DT::datatable(options=list(scrollX = TRUE))
+
+```
+
+
+### Export data if needed
+
+
+```{r}
+df_new <- as.data.frame(df_spdf)
+df_new %>% 
+  head() %>% 
+  DT::datatable(options=list(scrollX = TRUE))
+
+#write.csv(ds_new, "/XXX.csv")
+
+```
+
+
+################################################################################################

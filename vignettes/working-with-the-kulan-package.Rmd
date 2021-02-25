@@ -14,6 +14,171 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
 library(Kulan)
 ```
+
+## Key functions
+
+### Drone flight descriptors
+
+**Import some data**
+
+The package has some flight datasets inside it that can be used for generating examples. 
+
+
+```{r get the data}
+df<-Kulan::All_Flight_Right
+```
+
+**Tidy the data frame to make it more R friendly**
+
+The dataframe has some column names that are not very "R friendly" because, for example, they have spaces in the names (e.g. "Alt above ground" ). The {janitor} package replaces the names with a more standard format ("alt_above_ground")
+
+```{r use janitor to tidy the coloumn names }
+df<-df %>% 
+  janitor::clean_names()
+
+```
+
+**Get the ground in the image**
+
+To calculate the width of a drone image we need to know the height of the drone and the angle of the cameras. The inbuilt functions in the {Kulan} package use the camera dimensions from the cameras used in the field as default values. 
+
+```{r ground in image}
+df<-df %>%
+  rowwise() %>%
+  mutate("grd_in_img"=Kulan::grd_in_img(`alt_above_ground`)) 
+
+mean(df$grd_in_img)
+```
+
+**Get the ground surface distance**
+
+To calculate the ground surface distance (1 pixel) there are two functions, one that assumes no distortion due to the angle of the camera and one that allows for distortion (this later function is still in development) . 
+
+```{r}
+
+df<-df %>%
+  rowwise() %>%
+  mutate("get_GSD"=Kulan::get_GSD(Altitude = `alt_above_ground`)) 
+
+mean(df$get_GSD, na.rm=TRUE) # this includes the drones take off and landing phases so needs to be recalculated 
+```
+
+
+### Abundance estimators
+
+**Simulate a dataset**
+
+```{r}
+data=Kulan::sim_kulan_data()
+
+```
+
+--- 
+
+## sim_kulan_data {Kulan}	R Documentation
+
+# Simulate a dataset
+
+## Description
+
+Simulate a dataset
+
+### Usage
+
+sim_kulan_data(n = 100, ma = 25, p0 = 0.5, ml = 20, w = 0.2)
+
+### Arguments
+
+n	number of transects
+
+ma	mean number of animals counted where they are counted
+
+p0 proportion of the transects that will be empty
+
+ml	mean length of the transects
+w	width of the transects (assuming a constant width)
+
+Value simulated data in a dataframe
+
+---
+
+**Run the Jolly2 model**
+
+```{r}
+jolly2(species_count = data$sp_count, Transect_area = data$Trans_area,Z=164*5)
+```
+
+---
+
+## jolly2 {Kulan}	R Documentation
+
+# Calculate Jolly II estimate and 95% Confidence Interval
+
+## Description
+
+Calculate Jolly II estimate and 95% Confidence Interval
+
+## Usage
+
+jolly2(species_count, Transect_area, Z = Z)
+
+## Arguments
+species_count	the column from the dataset with the species counts in
+
+Transect_area	the column from the dataset with the transect areas in
+
+Z	the stratum area (the total area that we are extrapolating to)
+
+Value dataframe with Jolly II estimate and 95% CI
+
+---
+
+
+
+**Run the n-mixture model**
+
+```{r}
+mod1<-run_kulan_model(p_area = .49, p_min = 1000, p_max=4000, no_ind = data$sp_count, plot.out = TRUE)
+```
+
+---
+
+## run_kulan_model {Kulan}	R Documentation
+
+# Calculate Bayesian estimate and 95% HDI
+
+## Description
+
+Calculate Bayesian estimate and 95% HDI
+
+## Usage
+
+run_kulan_model(
+  p_area = p_area.,
+  p_min = p_min.,
+  p_max = p_max.,
+  no_ind = no_ind.,
+  plot.out = "No"
+)
+
+##Arguments
+
+p_area	proportion of the stratum that has been sampled
+
+p_min	prior minimum number of animals
+
+p_max	prior maximum number of animals
+
+no_ind Indivduals count column from data
+
+plot.out Add a plot ("Yes") of the distribution of the estimate (default is "No")
+
+Value dataframe with estimate and hdi
+
+---

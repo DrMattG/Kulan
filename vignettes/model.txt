@@ -1,0 +1,11 @@
+
+model {
+
+	# Prior:
+	N ~ dunif(p_min, p_max)	# No. of kulan in whole area
+	n <- N * a				# No. of kulan in area a
+			# Likelihood:
+	C ~ dpois(n)
+
+}
+
