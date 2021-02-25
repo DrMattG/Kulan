@@ -1,0 +1,73 @@
+---
+title: "Kulan_package"
+author: "Matt"
+date: "31 1 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(Kulan)
+```
+
+## Key functions
+
+**Import some data**
+The package has one flight dataset inside it that can be used for generating examples. 
+
+
+```{r get the data}
+df<-Kulan::All_Flight_Right
+```
+
+**Tidy the data frame to make it more R friendly**
+
+```{r use janitor to tidy the coloumn names }
+df<-df %>% 
+  janitor::clean_names()
+
+```
+
+**Get the ground in the image**
+
+```{r ground in image}
+df<-df %>%
+  rowwise() %>%
+  mutate("grd_in_img"=grd_in_img(`alt_above_ground`)) 
+```
+
+```{r plot ground in image}
+
+df %>% 
+  filter(grd_in_img>0) %>% 
+  ggplot(aes(grd_in_img)) +
+  geom_density(fill="purple")+
+  geom_vline(xintercept = mean(df$grd_in_img, na.rm = TRUE), lty=2, size=1)+
+  labs(x=" Ground in the image")+
+  ggpubr::theme_pubclean()
+
+```
+
+**Get the ground surface distance**
+
+```{r get ground surface distance}
+# for a single value 
+
+get_GSD(Altitude = 400)
+
+```
+
+```{r apply to a whole dataframe}
+data<-df %>%
+  rowwise() %>%
+  mutate("gsd"=get_GSD(Altitude = alt_above_ground))
+
+#cm/px
+
+data %>% 
+  ungroup() %>% 
+  summarise(mean=mean(gsd, na.rm = TRUE), sd=sd(gsd, na.rm = TRUE))
+
+```
+
