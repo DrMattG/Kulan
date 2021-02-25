@@ -2,14 +2,16 @@ Package: Kulan
 Title: Functions and tools for working with drone data from the Kulan Project
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "Matt",
+    c(person(given = "Matt",
            family = "Grainger",
            role = c("aut", "cre"),
            email = "Matthew.Grainger@NINA.no",
-           comment = c(ORCID = "0000-0001-8426-6495"))
+           comment = c(ORCID = "0000-0001-8426-6495")),
+           person(given="Petra",
+           family="Kaczensky",
+           role= c("aut")))
 Description: This package contains functions that will help in the analysis of data from drone surveys primarily for Kulan.  
-License: `use_mit_license()`, `use_gpl3_license()` or friends to
-    pick a license
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
