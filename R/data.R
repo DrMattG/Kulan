@@ -49,7 +49,3 @@
 #' @details DETAILS
 "All_Flight_Left"
 
-#' @title DEM model
-#' @description Example of a DEM model
-#' @format RasterLayer
-"DEM30_BK"
