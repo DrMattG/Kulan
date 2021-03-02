@@ -59,7 +59,7 @@ Flight1_left <- sp::SpatialPoints(dfsp, proj4string = sp::CRS(prj_dd))
 Now we need to import our regional DEM model. These are usually in the Raster format. You will need to add a raster file from your local computer. 
 
 ```{r}
-#DEM30_BK=raster::raster("data/Barsa-kelmes.tif")
+DEM30_BK=raster::raster(paste0(here::here(),"/data/Barsa-Kelmes.tif"))
 ```
 
 Next we need to see what the coordinate system of the DEM model is: 
