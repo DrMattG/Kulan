@@ -72,7 +72,7 @@
 
       
 
-      </header><div class="row">
+      </header><script src="working-with-the-kulan-package_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Working with the Kulan package</h1>
@@ -124,72 +124,112 @@
 <h3 class="hasAnchor">
 <a href="#abundance-estimators" class="anchor"></a>Abundance estimators</h3>
 <p><strong>Simulate a dataset</strong></p>
+<p>To simulate a dataset we can use the sim_kulan_data() function. To get help from the package please use the code below:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">data</span><span class="op">=</span><span class="fu">Kulan</span><span class="fu">::</span><span class="fu"><a href="../reference/sim_kulan_data.html">sim_kulan_data</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/help.html">help</a></span><span class="op">(</span><span class="st">"sim_kulan_data"</span><span class="op">)</span></code></pre></div>
+<p>which outputs the details of the function:</p>
 <hr>
 </div>
-</div>
-<div id="sim_kulan_data-kulan-r-documentation" class="section level2">
-<h2 class="hasAnchor">
-<a href="#sim_kulan_data-kulan-r-documentation" class="anchor"></a>sim_kulan_data {Kulan} R Documentation</h2>
-</div>
-<div id="simulate-a-dataset" class="section level1">
-<h1 class="hasAnchor">
-<a href="#simulate-a-dataset" class="anchor"></a>Simulate a dataset</h1>
-<div id="description" class="section level2">
-<h2 class="hasAnchor">
-<a href="#description" class="anchor"></a>Description</h2>
-<p>Simulate a dataset</p>
-<div id="usage" class="section level3">
+<div id="sim_kulan_data-kulan-r-documentation" class="section level3">
 <h3 class="hasAnchor">
-<a href="#usage" class="anchor"></a>Usage</h3>
+<a href="#sim_kulan_data-kulan-r-documentation" class="anchor"></a>sim_kulan_data {Kulan} R Documentation</h3>
+</div>
+<div id="simulate-a-dataset" class="section level3">
+<h3 class="hasAnchor">
+<a href="#simulate-a-dataset" class="anchor"></a>Simulate a dataset</h3>
+<div id="description" class="section level4">
+<h4 class="hasAnchor">
+<a href="#description" class="anchor"></a>Description</h4>
+<p>Simulate a dataset</p>
+</div>
+<div id="usage" class="section level4">
+<h4 class="hasAnchor">
+<a href="#usage" class="anchor"></a>Usage</h4>
 <p>sim_kulan_data(n = 100, ma = 25, p0 = 0.5, ml = 20, w = 0.2)</p>
 </div>
-<div id="arguments" class="section level3">
-<h3 class="hasAnchor">
-<a href="#arguments" class="anchor"></a>Arguments</h3>
+<div id="arguments" class="section level4">
+<h4 class="hasAnchor">
+<a href="#arguments" class="anchor"></a>Arguments</h4>
 <p>n number of transects</p>
 <p>ma mean number of animals counted where they are counted</p>
 <p>p0 proportion of the transects that will be empty</p>
-<p>ml mean length of the transects w width of the transects (assuming a constant width)</p>
+<p>ml mean length of the transects</p>
+<p>w width of the transects (assuming a constant width)</p>
 <p>Value simulated data in a dataframe</p>
 <hr>
-<p><strong>Run the Jolly2 model</strong></p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/jolly2.html">jolly2</a></span><span class="op">(</span>species_count <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">sp_count</span>, Transect_area <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">Trans_area</span>,Z<span class="op">=</span><span class="fl">164</span><span class="op">*</span><span class="fl">5</span><span class="op">)</span>
-<span class="co">#&gt;   Estimate lower_CI upper_CI       SE mean.y     SD.y Coef.of.Var.y</span>
-<span class="co">#&gt; 1  2356.58 2053.663 2659.497 182.4371  11.53 12.30213      1.066967</span></code></pre></div>
+<code class="sourceCode R"><span class="va">data</span><span class="op">=</span><span class="fu">Kulan</span><span class="fu">::</span><span class="fu"><a href="../reference/sim_kulan_data.html">sim_kulan_data</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<p><strong>Run the Jolly2 model</strong></p>
+<p>To run the Jolly2 model we can use the jolly2() function. Again using help() will output a description of the function.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/help.html">help</a></span><span class="op">(</span><span class="st">"jolly2"</span><span class="op">)</span></code></pre></div>
 <hr>
 </div>
 </div>
-<div id="jolly2-kulan-r-documentation" class="section level2">
-<h2 class="hasAnchor">
-<a href="#jolly2-kulan-r-documentation" class="anchor"></a>jolly2 {Kulan} R Documentation</h2>
+<div id="jolly2-kulan-r-documentation" class="section level3">
+<h3 class="hasAnchor">
+<a href="#jolly2-kulan-r-documentation" class="anchor"></a>jolly2 {Kulan} R Documentation</h3>
 </div>
-</div>
-<div id="calculate-jolly-ii-estimate-and-95-confidence-interval" class="section level1">
-<h1 class="hasAnchor">
-<a href="#calculate-jolly-ii-estimate-and-95-confidence-interval" class="anchor"></a>Calculate Jolly II estimate and 95% Confidence Interval</h1>
-<div id="description-1" class="section level2">
-<h2 class="hasAnchor">
-<a href="#description-1" class="anchor"></a>Description</h2>
+<div id="calculate-jolly-ii-estimate-and-95-confidence-interval" class="section level3">
+<h3 class="hasAnchor">
+<a href="#calculate-jolly-ii-estimate-and-95-confidence-interval" class="anchor"></a>Calculate Jolly II estimate and 95% Confidence Interval</h3>
+<div id="description-1" class="section level4">
+<h4 class="hasAnchor">
+<a href="#description-1" class="anchor"></a>Description</h4>
 <p>Calculate Jolly II estimate and 95% Confidence Interval</p>
 </div>
-<div id="usage-1" class="section level2">
-<h2 class="hasAnchor">
-<a href="#usage-1" class="anchor"></a>Usage</h2>
+<div id="usage-1" class="section level4">
+<h4 class="hasAnchor">
+<a href="#usage-1" class="anchor"></a>Usage</h4>
 <p>jolly2(species_count, Transect_area, Z = Z)</p>
 </div>
-<div id="arguments-1" class="section level2">
-<h2 class="hasAnchor">
-<a href="#arguments-1" class="anchor"></a>Arguments</h2>
+<div id="arguments-1" class="section level4">
+<h4 class="hasAnchor">
+<a href="#arguments-1" class="anchor"></a>Arguments</h4>
 <p>species_count the column from the dataset with the species counts in</p>
 <p>Transect_area the column from the dataset with the transect areas in</p>
 <p>Z the stratum area (the total area that we are extrapolating to)</p>
 <p>Value dataframe with Jolly II estimate and 95% CI</p>
 <hr>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="../reference/jolly2.html">jolly2</a></span><span class="op">(</span>species_count <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">sp_count</span>, Transect_area <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">Trans_area</span>,Z<span class="op">=</span><span class="fl">164</span><span class="op">*</span><span class="fl">5</span><span class="op">)</span>
+<span class="co">#&gt;   Estimate lower_CI upper_CI       SE mean.y     SD.y Coef.of.Var.y</span>
+<span class="co">#&gt; 1 2569.836 2234.919 2904.754 201.7098  12.26 13.03501      1.063215</span></code></pre></div>
 <p><strong>Run the n-mixture model</strong></p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<p>Finally, to run the n-mixture model you can use the run_kulan_model() function. See more details about this function using help().</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/help.html">help</a></span><span class="op">(</span><span class="st">"run_kulan_model"</span><span class="op">)</span></code></pre></div>
+<hr>
+</div>
+</div>
+<div id="run_kulan_model-kulan-r-documentation" class="section level3">
+<h3 class="hasAnchor">
+<a href="#run_kulan_model-kulan-r-documentation" class="anchor"></a>run_kulan_model {Kulan} R Documentation</h3>
+</div>
+<div id="calculate-bayesian-estimate-and-95-hdi" class="section level3">
+<h3 class="hasAnchor">
+<a href="#calculate-bayesian-estimate-and-95-hdi" class="anchor"></a>Calculate Bayesian estimate and 95% HDI</h3>
+<div id="description-2" class="section level4">
+<h4 class="hasAnchor">
+<a href="#description-2" class="anchor"></a>Description</h4>
+<p>Calculate Bayesian estimate and 95% HDI</p>
+</div>
+<div id="usage-2" class="section level4">
+<h4 class="hasAnchor">
+<a href="#usage-2" class="anchor"></a>Usage</h4>
+<p>run_kulan_model( p_area = p_area., p_min = p_min., p_max = p_max., no_ind = no_ind., plot.out = “No” )</p>
+</div>
+<div id="arguments-2" class="section level4">
+<h4 class="hasAnchor">
+<a href="#arguments-2" class="anchor"></a>Arguments</h4>
+<p>p_area proportion of the stratum that has been sampled</p>
+<p>p_min prior minimum number of animals</p>
+<p>p_max prior maximum number of animals</p>
+<p>no_ind Indivduals count column from data</p>
+<p>plot.out Add a plot (“Yes”) of the distribution of the estimate (default is “No”)</p>
+<p>Value dataframe with estimate and hdi</p>
+<hr>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">mod1</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/run_kulan_model.html">run_kulan_model</a></span><span class="op">(</span>p_area <span class="op">=</span> <span class="fl">.49</span>, p_min <span class="op">=</span> <span class="fl">1000</span>, p_max<span class="op">=</span><span class="fl">4000</span>, no_ind <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">sp_count</span>, plot.out <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 <span class="co">#&gt; Loading required package: coda</span>
 <span class="co">#&gt; Loading required package: MASS</span>
@@ -242,34 +282,8 @@
 <span class="co">#&gt; Calculating statistics....... </span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Done.</span></code></pre></div>
-<p><img src="working-with-the-kulan-package_files/figure-html/unnamed-chunk-5-1.png" width="700"></p>
-<hr>
+<p><img src="working-with-the-kulan-package_files/figure-html/unnamed-chunk-8-1.png" width="700"></p>
 </div>
-<div id="run_kulan_model-kulan-r-documentation" class="section level2">
-<h2 class="hasAnchor">
-<a href="#run_kulan_model-kulan-r-documentation" class="anchor"></a>run_kulan_model {Kulan} R Documentation</h2>
-</div>
-</div>
-<div id="calculate-bayesian-estimate-and-95-hdi" class="section level1">
-<h1 class="hasAnchor">
-<a href="#calculate-bayesian-estimate-and-95-hdi" class="anchor"></a>Calculate Bayesian estimate and 95% HDI</h1>
-<div id="description-2" class="section level2">
-<h2 class="hasAnchor">
-<a href="#description-2" class="anchor"></a>Description</h2>
-<p>Calculate Bayesian estimate and 95% HDI</p>
-</div>
-<div id="usage-2" class="section level2">
-<h2 class="hasAnchor">
-<a href="#usage-2" class="anchor"></a>Usage</h2>
-<p>run_kulan_model( p_area = p_area., p_min = p_min., p_max = p_max., no_ind = no_ind., plot.out = “No” )</p>
-<p>##Arguments</p>
-<p>p_area proportion of the stratum that has been sampled</p>
-<p>p_min prior minimum number of animals</p>
-<p>p_max prior maximum number of animals</p>
-<p>no_ind Indivduals count column from data</p>
-<p>plot.out Add a plot (“Yes”) of the distribution of the estimate (default is “No”)</p>
-<p>Value dataframe with estimate and hdi</p>
-<hr>
 </div>
 </div>
   </div>

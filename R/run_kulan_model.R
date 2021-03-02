@@ -14,8 +14,8 @@ run_kulan_model=function(p_area=p_area., p_min=p_min., p_max=p_max., no_ind=no_i
   library(MCMCpack)
   library(jagsUI)
   library(wiqid)
-
-  modelstring = "
+#
+ write("
 model {
 
 	# Prior:
@@ -25,8 +25,8 @@ model {
 	C ~ dpois(n)
 
 }
-" # close quote for modelstring
-writeLines(modelstring, con="model.txt")
+","Kulan.jags") # close quote for modelstring
+# writeLines(modelstring, con="model.txt")
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 # Prepare the data:
@@ -37,7 +37,7 @@ jagsData <- list(a = p_area, C = sum(no_ind), p_min=p_min, p_max=p_max)
 # Run the model in JAGS
 # ------------------------
 jagsout <- jags(jagsData, inits=NULL, parameters.to.save=c("N","n"),
-                model.file="model.txt",
+                model.file="Kulan.jags",
                 n.chains=3, n.iter=20000, n.burnin=0, DIC=FALSE)
 #jagsout
 #plot(jagsout)

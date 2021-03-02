@@ -74,26 +74,29 @@ mean(df$get_GSD, na.rm=TRUE) # this includes the drones take off and landing pha
 
 **Simulate a dataset**
 
-```{r}
-data=Kulan::sim_kulan_data()
+To simulate a dataset we can use the sim_kulan_data() function. To get help from the package please use the code below:
 
+```{r, eval=FALSE}
+help("sim_kulan_data")
 ```
+
+which outputs the details of the function:
 
 --- 
 
-## sim_kulan_data {Kulan}	R Documentation
+### sim_kulan_data {Kulan}	R Documentation
 
-# Simulate a dataset
+### Simulate a dataset
 
-## Description
+#### Description
 
 Simulate a dataset
 
-### Usage
+#### Usage
 
 sim_kulan_data(n = 100, ma = 25, p0 = 0.5, ml = 20, w = 0.2)
 
-### Arguments
+#### Arguments
 
 n	number of transects
 
@@ -102,33 +105,43 @@ ma	mean number of animals counted where they are counted
 p0 proportion of the transects that will be empty
 
 ml	mean length of the transects
+
 w	width of the transects (assuming a constant width)
 
 Value simulated data in a dataframe
 
 ---
 
-**Run the Jolly2 model**
 
 ```{r}
-jolly2(species_count = data$sp_count, Transect_area = data$Trans_area,Z=164*5)
+data=Kulan::sim_kulan_data()
+
+```
+
+
+**Run the Jolly2 model**
+
+To run the Jolly2 model we can use the jolly2() function. Again using help() will output a description of the function.
+
+```{r, eval=FALSE}
+help("jolly2")
 ```
 
 ---
 
-## jolly2 {Kulan}	R Documentation
+### jolly2 {Kulan}	R Documentation
 
-# Calculate Jolly II estimate and 95% Confidence Interval
+### Calculate Jolly II estimate and 95% Confidence Interval
 
-## Description
+#### Description
 
 Calculate Jolly II estimate and 95% Confidence Interval
 
-## Usage
+#### Usage
 
 jolly2(species_count, Transect_area, Z = Z)
 
-## Arguments
+#### Arguments
 species_count	the column from the dataset with the species counts in
 
 Transect_area	the column from the dataset with the transect areas in
@@ -141,23 +154,31 @@ Value dataframe with Jolly II estimate and 95% CI
 
 
 
+```{r}
+jolly2(species_count = data$sp_count, Transect_area = data$Trans_area,Z=164*5)
+```
+
+
 **Run the n-mixture model**
 
-```{r}
-mod1<-run_kulan_model(p_area = .49, p_min = 1000, p_max=4000, no_ind = data$sp_count, plot.out = TRUE)
+Finally, to run the n-mixture model you can use the run_kulan_model() function. See more details about this function using help(). 
+
+```{r, eval=FALSE}
+help("run_kulan_model")
 ```
+
 
 ---
 
-## run_kulan_model {Kulan}	R Documentation
+### run_kulan_model {Kulan}	R Documentation
 
-# Calculate Bayesian estimate and 95% HDI
+### Calculate Bayesian estimate and 95% HDI
 
-## Description
+#### Description
 
 Calculate Bayesian estimate and 95% HDI
 
-## Usage
+#### Usage
 
 run_kulan_model(
   p_area = p_area.,
@@ -167,7 +188,7 @@ run_kulan_model(
   plot.out = "No"
 )
 
-##Arguments
+#### Arguments
 
 p_area	proportion of the stratum that has been sampled
 
@@ -182,3 +203,9 @@ plot.out Add a plot ("Yes") of the distribution of the estimate (default is "No"
 Value dataframe with estimate and hdi
 
 ---
+
+```{r}
+mod1<-run_kulan_model(p_area = .49, p_min = 1000, p_max=4000, no_ind = data$sp_count, plot.out = TRUE)
+```
+
+
