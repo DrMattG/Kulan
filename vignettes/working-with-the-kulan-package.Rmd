@@ -27,7 +27,7 @@ library(Kulan)
 
 **Import some data**
 
-The package has some flight datasets inside it that can be used for generating examples. 
+The package has some flight datasets inside it that can be used for generating examples. You can add your own data using any of the read functions available in  http://www.sthda.com/english/wiki/importing-data-into-r. Usually we use the read.csv() to read in a .csv file. There are options for excel files and text files too. 
 
 
 ```{r get the data}
