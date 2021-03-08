@@ -1,7 +1,6 @@
 ---
 title: "Flight summaries"
 author: "Matt"
-date: "6 11 2020"
 subtitle: "`r paste0('updated: ',format(Sys.time(), '%d/%m/%y'))`"
 output: html_document
 ---
@@ -20,32 +19,8 @@ library(ggpubr)
 
 
 ```{r make a large dataset, echo=FALSE, message=FALSE, warning=FALSE}
-# Upload data -------------------------------------------------------------
-# Flight1_RightCamera_eng <- read_csv("Flight1_RightCamera_eng.csv")
-# Flight2_RightCamera_eng <- read_csv("Flight2_RightCamera_eng.csv")
-# Flight3_RightCamera_eng <- read_csv("Flight3_RightCamera_eng.csv")
-# Flight4_RightCamera_eng <- read_csv("Flight4_RightCamera_eng.csv")
-# Flight5_RightCamera_eng <- read_csv("Flight5_RightCamera_eng.csv")
-# Flight6_RightCamera_eng <- read_csv("Flight6_RightCamera_eng.csv")
-# Flight7_RightCamera_eng <- read_csv("Flight7_RightCamera_eng.csv")
-# Flight8_RightCamera_eng <- read_csv("Flight8_RightCamera_eng.csv")
-
-
-# Bind_data ---------------------------------------------------------------
-
-# All_Flight_Right<-bind_rows(Flight1_RightCamera_eng,Flight2_RightCamera_eng,
-#                             Flight3_RightCamera_eng,Flight4_RightCamera_eng,
-#                             Flight5_RightCamera_eng, Flight6_RightCamera_eng,
-#                             Flight7_RightCamera_eng, Flight8_RightCamera_eng, .id="id")
-
-# Remove empty coloumn ----------------------------------------------------
-
-# All_Flight_Right$X18<-NULL
-
-# Save as RDS -------------------------------------------------------------
-
-#saveRDS(All_Flight_Right, "All_Flight_Right.RDS")
-
+path="data/tables"
+all_dfs=Kulan::get_tables(path)
 ```
 
 
