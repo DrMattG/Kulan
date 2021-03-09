@@ -7,6 +7,8 @@
 Alt_threshold(df = df, Alt = Alt, height = 100)
 }
 \arguments{
+\item{df}{The dataframe}
+
 \item{Alt}{Altitude column in the dataframe}
 
 \item{height}{The threshold height (remove values lower than the height)}

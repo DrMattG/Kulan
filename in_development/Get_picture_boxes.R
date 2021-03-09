@@ -36,7 +36,7 @@
 # saveRDS(All_Flight_Right, "All_Flight_Right.RDS")
 
 
-35/All_Flight_Right$`Alt above ground`[10]
+350/All_Flight_Right$`Alt above ground`[10]
 
 All_Flight_Right<- readRDS("C:/Users/matthew.grainger/Documents/Projects_in_development/Kulan/data/All_Flight_Right.RDS")
 
@@ -137,7 +137,7 @@ All_Flight_Right$bby4[i]<-st_coordinates(test2)[2]+All_Flight_Right$dutmy4[i]
 df<-data.frame(bbx1=All_Flight_Right$bbx1[15],
           bbx2=All_Flight_Right$bbx2[15],
           bby1=All_Flight_Right$bby1[15],
-          bby3All_Flight_Right$bby2[15])
+          bby3=All_Flight_Right$bby2[15])
 
 df
 

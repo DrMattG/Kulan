@@ -4,11 +4,21 @@
 \alias{get_tables}
 \title{Extract all csv files from a nested folder on your local computer}
 \usage{
-get_tables(path = path)
+get_tables(path = path, filetype = ".csv")
 }
 \arguments{
 \item{path}{the path to the nested folders}
+
+\item{filetype}{the file type (supports ".csv", ".xls" & ".xlsx" only)}
 }
 \description{
 Extract all csv files from a nested folder on your local computer
+}
+\details{
+This function only finds files with the word "RightCamera" in their name. It is important to follow the project naming conventions for all files
+}
+\examples{
+\dontrun{
+df=get_tables(path="data/tables/", filetype = ".csv")
+}
 }

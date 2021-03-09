@@ -5,7 +5,6 @@ subtitle: "`r paste0('updated: ',format(Sys.time(), '%d/%m/%y'))`"
 output: html_document
 ---
 
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 options(qwraps2_markup = "markdown")
@@ -16,7 +15,7 @@ library(Kulan)
 library(ggpubr)
 ```
 
-
+## Gather all the Flights in to a single dataset
 
 ```{r make a large dataset, echo=FALSE, message=FALSE, warning=FALSE}
 library(here)
@@ -26,6 +25,13 @@ list.files(path)
 all_dfs=Kulan::get_tables(path)
 ```
 
+## Draw the flight paths
+
+```{r}
+all_dfs %>% 
+  ggplot(aes(Lon_dec,Lat_dec, colour=Class))+
+  geom_line()
+```
 
 ```{r apply grd_in_img function, echo=FALSE, message=FALSE, warning=FALSE}
 # For all flights AND each flight  ----------------------------------------
@@ -77,12 +83,9 @@ tab_1
 ```
 
 
-## Flight paths
+
 
 ```{r}
-all_dfs %>% 
-  ggplot(aes(Lon_dec,Lat_dec, colour=Class))+
-  geom_line()
-```
 
+```
 
