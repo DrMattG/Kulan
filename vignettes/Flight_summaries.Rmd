@@ -1,0 +1,154 @@
+---
+title: "Flight summaries"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Flight summaries}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(qwraps2_markup = "markdown")
+library(tidyverse)
+library(readr)
+library(qwraps2)
+library(Kulan)
+library(ggpubr)
+```
+
+## Gather all the Flights in to a single dataset
+
+```{r make a large dataset, echo=TRUE, message=FALSE, warning=FALSE}
+library(here)
+#here::here()
+path=paste0(here::here(),"/", "data/tables")
+list.files(path)
+all_dfs=Kulan::get_tables(path, ".csv")
+all_dfs=all_dfs %>% 
+  janitor::clean_names() %>% 
+  rename(., Flight = class)
+  
+```
+
+## Draw the flight paths
+
+```{r}
+all_dfs %>% 
+  ggplot(aes(lat_dec,lon_dec, colour=Flight))+
+  geom_line()+
+  labs(x="Decimal Latitude", y="Decimal Longitude")+
+  theme_bw()
+```
+
+## Strip-width summary
+
+```{r, results='asis', echo=FALSE,, message=FALSE, warning=FALSE}
+ all_dfs=all_dfs%>% 
+    group_by(Flight) %>%
+  filter(!str_detect(photo_no, "IMG")) %>% # remove empty photos
+  rowwise() %>% 
+  mutate("grd_in_img"=Kulan::grd_in_img(alt_above_ground))
+ our_summary1 <-
+  list("strip width" =
+         list("min"       = ~ round(min(grd_in_img)),
+              "max"       = ~ round(max(grd_in_img)),
+              "mean (sd)" = ~ qwraps2::mean_sd(grd_in_img)))
+
+
+tab_1<-qwraps2::summary_table(dplyr::group_by(all_dfs, Flight),our_summary1)
+tab_1
+
+```
+
+## Remove points where the drone is in take-off or landing
+
+### First plot the data
+
+```{r}
+all_dfs %>% 
+  ggplot(aes(time, alt_above_ground, colour=Flight)) +
+  labs(y= "Altitude above sea level")+
+  theme(axis.text.x = element_blank())+
+  geom_point()+
+  theme(legend.position = "None")+
+  facet_wrap(~Flight)
+```
+
+The take-off and landing phases are clear from the plot. We could use the quantiles of each flight to automate the removal these points.
+
+```{r}
+all_dfs %>% 
+  group_by(Flight) %>% 
+  summarise(quants = quantile(alt_above_ground, probs = c(0.2), na.rm=TRUE))->quants
+
+df3 <- data.frame(Flight=unique(all_dfs$Flight),threshold=quants,stringsAsFactors = FALSE)
+
+all_dfs_reduced=all_dfs %>% 
+  group_by(Flight) %>% 
+  inner_join(df3) %>% 
+    filter(alt_above_ground>threshold.quants)
+
+all_dfs_reduced%>% 
+  ggplot(aes(time, alt_above_ground, colour=Flight)) +
+  labs(y= "Altitude above sea level")+
+  geom_point()
+```
+
+## Ground surface resolution 
+
+**NEED TO TEST THIS FUNCTION AS I AM NOT CONVINCED IT IS WORKING AS EXPECTED**
+
+
+```{r}
+GSR_all_dfs=all_dfs_reduced %>% 
+  rowwise() %>% 
+  mutate("GSR"=get_GSD_dist(Altitude = alt_above_ground, Angle = banking_angle)) %>% 
+  select(GSR) %>% 
+  group_by(Flight) 
+
+df=GSR_all_dfs %>% 
+  group_by(Flight) %>% 
+  group_split()
+
+data.frame("Flight"=c("Flight1","Flight2","Flight3","Flight4","Flight5","Flight6","Flight7","Flight8"), "GSDh"= c(mean(df[[1]]$GSR$GSDh),mean(df[[2]]$GSR$GSDh),mean(df[[3]]$GSR$GSDh),mean(df[[4]]$GSR$GSDh),mean(df[[5]]$GSR$GSDh),mean(df[[6]]$GSR$GSDh),mean(df[[7]]$GSR$GSDh),mean(df[[8]]$GSR$GSDh)),"GSDw"= c(mean(df[[1]]$GSR$GSDw),mean(df[[2]]$GSR$GSDw),mean(df[[3]]$GSR$GSDw),mean(df[[4]]$GSR$GSDw),mean(df[[5]]$GSR$GSDw),mean(df[[6]]$GSR$GSDw),mean(df[[7]]$GSR$GSDw),mean(df[[8]]$GSR$GSDw)))
+
+```
+
+## Overlap
+
+To add
+
+## Distance & time
+
+```{r}
+library(geosphere)
+all_dfs_reduced$lat_dec[1]
+all_dfs_reduced$lat_dec[2]
+all_dfs_reduced$lon_dec[1]
+all_dfs_reduced$lon_dec[2]
+
+distm (c(all_dfs_reduced$lat_dec[1],
+all_dfs_reduced$lat_dec[2]), c(all_dfs_reduced$lon_dec[1],
+all_dfs_reduced$lon_dec[2]), fun = distHaversine)
+
+```
+
+```{r}
+all_dfs_reduced %>% 
+  mutate(time=as.POSIXct(time,format="%H:%M:%S")) %>% 
+group_by(Flight) %>% mutate("T_diff"=difftime(time,lag(time))) %>%
+  mutate("T_diff2"=as.numeric(T_diff)) %>% 
+  drop_na(T_diff2) %>% 
+  mutate("time_cum"=cumsum(T_diff2)) %>% 
+  mutate(row_n=row_number()) %>% 
+  ggplot(aes(time_cum, row_n,colour=Flight)) +
+  geom_line()+
+  facet_wrap(~Flight)+
+  labs(x="Cummulative time in seconds", y="number of images")+
+  ggthemes::theme_clean()+
+  theme(legend.position = "None")
+  
+  
+```
+

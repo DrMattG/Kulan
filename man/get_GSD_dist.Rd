@@ -10,7 +10,8 @@ get_GSD_dist(
   Image_Width = 7952,
   Image_Height = 5304,
   Focal_Length = 35,
-  Altitude
+  Altitude,
+  Angle
 )
 }
 \arguments{
@@ -24,9 +25,9 @@ get_GSD_dist(
 
 \item{Focal_Length}{Focal length}
 
-\item{altitude}{the height of the drone above the ground}
-
 \item{Angle}{Angle of the camera}
+
+\item{altitude}{the height of the drone above the ground}
 }
 \value{
 Ground surface distance

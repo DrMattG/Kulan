@@ -28,11 +28,14 @@ get_GSD<-function(Sensor_Height=24,Sensor_Width=35,Image_Width=7952,Image_Height
 #' @return Ground surface distance
 #' @export
 #'
-get_GSD_dist<-function(Sensor_Height=24,Sensor_Width=35,Image_Width=7952,Image_Height=5304,Focal_Length=35,Altitude){
+get_GSD_dist<-function(Sensor_Height=24,Sensor_Width=35,Image_Width=7952,Image_Height=5304,Focal_Length=35,Altitude, Angle){
   GSDh=((Altitude*100)*(Sensor_Height/10))/((Focal_Length/10)*Image_Height)
   GSDh
   GSDw=((Altitude*100)*(Sensor_Width/10))/((Focal_Length/10)*Image_Width)
   GSDw
   GSD=max(GSDh,GSDw)
   GSDc<-GSD*(cos(REdaS::deg2rad(Angle))^-1)
-  return(GSDc)}
+  df=data.frame("GSDc"=GSDc, "GSDh"= GSDh, "GSDw"=GSDw)
+  return(df)}
+
+get_GSD_dist(Altitude = 10, Angle=0)
