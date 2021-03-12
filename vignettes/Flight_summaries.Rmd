@@ -241,3 +241,26 @@ all_dfs_reduced %>%
 
 ```
 
+
+## Summary outputs
+
+```{r}
+# photographs per Flight
+all_dfs_reduced %>% 
+  group_by(Flight) %>% 
+  select(photo_no) %>% 
+  summarise(Photos_per_Flight=n()) %>% 
+  ggplot(aes(Flight,Photos_per_Flight, fill=Flight))+
+  labs(y="Photographs per Flight")+
+  geom_bar(stat="identity")+
+  theme(legend.position = "none")
+
+```
+
+```{r}
+tab=over %>% 
+  select(Flight, photo_no, date, time,alt_above_ground ,grd_in_img, overlap)
+
+kableExtra::kable(tab)
+```
+
