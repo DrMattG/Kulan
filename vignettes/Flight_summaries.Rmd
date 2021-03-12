@@ -228,7 +228,7 @@ data.frame("Flight"=c("Flight1","Flight2","Flight3","Flight4","Flight5","Flight6
 ```
 
 
-## Area (two sides) of each image
+## Area ( two sides) of each image
 
 *Does not take in to account angle*
 
@@ -240,5 +240,4 @@ all_dfs_reduced %>%
   summarise(Side1=mean(side1, na.rm=TRUE), Side2=mean(side2, na.rm=TRUE))
 
 ```
-
 
