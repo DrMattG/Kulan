@@ -130,10 +130,6 @@ All_Flight_Right$bbx4[i]<-st_coordinates(test2)[1]+All_Flight_Right$dutmx4[i]
 All_Flight_Right$bby4[i]<-st_coordinates(test2)[2]+All_Flight_Right$dutmy4[i]
 }
 
-
-
-
-
 df<-data.frame(bbx1=All_Flight_Right$bbx1[15],
           bbx2=All_Flight_Right$bbx2[15],
           bby1=All_Flight_Right$bby1[15],

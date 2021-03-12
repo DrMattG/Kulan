@@ -95,11 +95,8 @@
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://here.r-lib.org/">here</a></span><span class="op">)</span>
 <span class="co">#here::here()</span>
 <span class="va">path</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org//reference/here.html">here</a></span><span class="op">(</span><span class="op">)</span>,<span class="st">"/"</span>, <span class="st">"data/tables"</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/list.files.html">list.files</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></code></pre></div>
-<pre><code>## [1] "Flight1" "Flight2" "Flight3" "Flight4" "Flight5" "Flight6" "Flight7"
-## [8] "Flight8"</code></pre>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">all_dfs</span><span class="op">=</span><span class="fu">Kulan</span><span class="fu">::</span><span class="fu"><a href="../reference/get_tables.html">get_tables</a></span><span class="op">(</span><span class="va">path</span>, <span class="st">".csv"</span><span class="op">)</span>
+<span class="co">#list.files(path)</span>
+<span class="va">all_dfs</span><span class="op">=</span><span class="fu">Kulan</span><span class="fu">::</span><span class="fu"><a href="../reference/get_tables.html">get_tables</a></span><span class="op">(</span><span class="va">path</span>, <span class="st">".csv"</span><span class="op">)</span>
 <span class="va">all_dfs</span><span class="op">=</span><span class="va">all_dfs</span> <span class="op">%&gt;%</span> 
   <span class="fu">janitor</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/janitor/man/clean_names.html">clean_names</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">rename</span><span class="op">(</span><span class="va">.</span>, Flight <span class="op">=</span> <span class="va">class</span><span class="op">)</span></code></pre></div>
@@ -107,13 +104,15 @@
 <div id="draw-the-flight-paths" class="section level2">
 <h2 class="hasAnchor">
 <a href="#draw-the-flight-paths" class="anchor"></a>Draw the flight paths</h2>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">all_dfs</span> <span class="op">%&gt;%</span> 
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span><span class="va">lat_dec</span>,<span class="va">lon_dec</span>, colour<span class="op">=</span><span class="va">Flight</span><span class="op">)</span><span class="op">)</span><span class="op">+</span>
   <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span><span class="op">+</span>
   <span class="fu">labs</span><span class="op">(</span>x<span class="op">=</span><span class="st">"Decimal Latitude"</span>, y<span class="op">=</span><span class="st">"Decimal Longitude"</span><span class="op">)</span><span class="op">+</span>
+  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">Flight</span>, scales <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span> <span class="op">+</span> 
   <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<p><img src="Flight_summaries_files/figure-html/unnamed-chunk-1-1.png" width="700"></p>
+<p><img src="Flight_summaries_files/figure-html/unnamed-chunk-1-1.png" width="1152"></p>
+<p>At this point you could add the altitude from the DEM [see the “Getting raster values form a Digital Elevation Model” vignette]. Here, for this example, we will use the column called Altitude above the ground (<em>because we can not include all the DEMs we would need inside the package</em>).</p>
 </div>
 <div id="strip-width-summary" class="section level2">
 <h2 class="hasAnchor">
@@ -195,7 +194,7 @@
 <div id="first-plot-the-data" class="section level3">
 <h3 class="hasAnchor">
 <a href="#first-plot-the-data" class="anchor"></a>First plot the data</h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">all_dfs</span> <span class="op">%&gt;%</span> 
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span><span class="va">time</span>, <span class="va">alt_above_ground</span>, colour<span class="op">=</span><span class="va">Flight</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">labs</span><span class="op">(</span>y<span class="op">=</span> <span class="st">"Altitude above sea level"</span><span class="op">)</span><span class="op">+</span>
@@ -205,98 +204,224 @@
   <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">Flight</span><span class="op">)</span></code></pre></div>
 <pre><code>## Warning: Removed 25 rows containing missing values (geom_point).</code></pre>
 <p><img src="Flight_summaries_files/figure-html/unnamed-chunk-3-1.png" width="700"></p>
-<p>The take-off and landing phases are clear from the plot. We could use the quantiles of each flight to automate the removal these points.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<p>From the distribution of the altitudes we can see that anything below 200 m is probably take-off or landing phase.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">all_dfs</span> <span class="op">%&gt;%</span> 
-  <span class="fu">group_by</span><span class="op">(</span><span class="va">Flight</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">summarise</span><span class="op">(</span>quants <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">alt_above_ground</span>, probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.2</span><span class="op">)</span>, na.rm<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">-&gt;</span><span class="va">quants</span>
-
-<span class="va">df3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>Flight<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">all_dfs</span><span class="op">$</span><span class="va">Flight</span><span class="op">)</span>,threshold<span class="op">=</span><span class="va">quants</span>,stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-
-<span class="va">all_dfs_reduced</span><span class="op">=</span><span class="va">all_dfs</span> <span class="op">%&gt;%</span> 
-  <span class="fu">group_by</span><span class="op">(</span><span class="va">Flight</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">inner_join</span><span class="op">(</span><span class="va">df3</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-    <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">alt_above_ground</span><span class="op">&gt;</span><span class="va">threshold.quants</span><span class="op">)</span></code></pre></div>
-<pre><code>## Joining, by = "Flight"</code></pre>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">all_dfs_reduced</span><span class="op">%&gt;%</span> 
+  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span><span class="va">alt_above_ground</span><span class="op">)</span><span class="op">)</span><span class="op">+</span>
+  <span class="fu">geom_histogram</span><span class="op">(</span>fill<span class="op">=</span><span class="st">"Red"</span><span class="op">)</span></code></pre></div>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<pre><code>## Warning: Removed 25 rows containing non-finite values (stat_bin).</code></pre>
+<p><img src="Flight_summaries_files/figure-html/unnamed-chunk-4-1.png" width="700"></p>
+<p>However, we might want to look more closely at Flight5 as it seems some of the points during the flight are below 200m.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">all_dfs</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">Flight</span><span class="op">==</span><span class="st">"Flight5"</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span><span class="va">time</span>, <span class="va">alt_above_ground</span>, colour<span class="op">=</span><span class="va">Flight</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">labs</span><span class="op">(</span>y<span class="op">=</span> <span class="st">"Altitude above sea level"</span><span class="op">)</span><span class="op">+</span>
-  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<p><img src="Flight_summaries_files/figure-html/unnamed-chunk-4-1.png" width="700"></p>
+  <span class="fu">theme</span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">+</span>
+  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span><span class="op">+</span>
+  <span class="fu">geom_hline</span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">200</span>, colour<span class="op">=</span><span class="st">"Red"</span>, lty<span class="op">=</span><span class="fl">2</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">geom_hline</span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">190</span>, colour<span class="op">=</span><span class="st">"Green"</span>, lty<span class="op">=</span><span class="fl">2</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"None"</span><span class="op">)</span></code></pre></div>
+<pre><code>## Warning: Removed 4 rows containing missing values (geom_point).</code></pre>
+<p><img src="Flight_summaries_files/figure-html/unnamed-chunk-5-1.png" width="700"></p>
+<p>So a couple of points in Flight5 during the actual flight were below our threshold of 200m. So let’s be conservative and go for 190m instead.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">all_dfs_reduced</span><span class="op">=</span><span class="va">all_dfs</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">alt_above_ground</span><span class="op">&gt;</span><span class="fl">190</span><span class="op">)</span></code></pre></div>
+<p>Now all the points in consideration are above 190m.Let’s re-run the strip-width summary.</p>
+<table class="table">
+<colgroup>
+<col width="11%">
+<col width="11%">
+<col width="11%">
+<col width="10%">
+<col width="10%">
+<col width="11%">
+<col width="11%">
+<col width="10%">
+<col width="11%">
+</colgroup>
+<thead><tr class="header">
+<th align="left"></th>
+<th align="left">Flight1 (N = 1665)</th>
+<th align="left">Flight2 (N = 1491)</th>
+<th align="left">Flight3 (N = 1407)</th>
+<th align="left">Flight4 (N = 1638)</th>
+<th align="left">Flight5 (N = 1498)</th>
+<th align="left">Flight6 (N = 1820)</th>
+<th align="left">Flight7 (N = 1443)</th>
+<th align="left">Flight8 (N = 1533)</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left"><strong>strip width</strong></td>
+<td align="left">  </td>
+<td align="left">  </td>
+<td align="left">  </td>
+<td align="left">  </td>
+<td align="left">  </td>
+<td align="left">  </td>
+<td align="left">  </td>
+<td align="left">  </td>
+</tr>
+<tr class="even">
+<td align="left">   min</td>
+<td align="left">421</td>
+<td align="left">453</td>
+<td align="left">459</td>
+<td align="left">489</td>
+<td align="left">437</td>
+<td align="left">429</td>
+<td align="left">426</td>
+<td align="left">439</td>
+</tr>
+<tr class="odd">
+<td align="left">   max</td>
+<td align="left">524</td>
+<td align="left">601</td>
+<td align="left">542</td>
+<td align="left">526</td>
+<td align="left">558</td>
+<td align="left">547</td>
+<td align="left">517</td>
+<td align="left">555</td>
+</tr>
+<tr class="even">
+<td align="left">   mean (sd)</td>
+<td align="left">509.16 ± 10.28</td>
+<td align="left">512.94 ± 13.33</td>
+<td align="left">488.45 ± 9.21</td>
+<td align="left">499.60 ± 7.65</td>
+<td align="left">499.89 ± 14.98</td>
+<td align="left">478.54 ± 13.78</td>
+<td align="left">508.24 ± 5.20</td>
+<td align="left">481.53 ± 14.74</td>
+</tr>
+</tbody>
+</table>
 </div>
+</div>
+<div id="speed-summary" class="section level2">
+<h2 class="hasAnchor">
+<a href="#speed-summary" class="anchor"></a>Speed summary</h2>
+<p>Using the gps_speed we can plot the speed of the drone during each flight.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">all_dfs_reduced</span><span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>rowid<span class="op">=</span><span class="fu">row_number</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>time<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/as.POSIXlt.html">as.POSIXct</a></span><span class="op">(</span><span class="va">time</span>,format<span class="op">=</span><span class="st">"%H:%M:%S"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span><span class="va">time</span>,<span class="va">gps_speed</span>,colour<span class="op">=</span><span class="va">alt_above_ground</span><span class="op">)</span><span class="op">)</span><span class="op">+</span>
+  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span><span class="op">+</span>
+  <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span><span class="op">+</span>
+    <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">Flight</span>, scales<span class="op">=</span><span class="st">"free"</span><span class="op">)</span></code></pre></div>
+<p><img src="Flight_summaries_files/figure-html/unnamed-chunk-8-1.png" width="700"></p>
+</div>
+<div id="distance-between-points-summary" class="section level2">
+<h2 class="hasAnchor">
+<a href="#distance-between-points-summary" class="anchor"></a>Distance between points summary</h2>
+<p>There are some very large distances moved at the start or the end of a Flight and these need to be filtered out to allow us to plot the distance more clearly. Anything above 250m is therefore removed in the plotting code below.The points are coloured by the gps_speed.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">distance_df</span><span class="op">=</span><span class="va">all_dfs_reduced</span><span class="op">%&gt;%</span> 
+  <span class="fu">group_by</span><span class="op">(</span><span class="va">Flight</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>new_lat<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/lag.html">lag</a></span><span class="op">(</span><span class="va">lat_dec</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">mutate</span><span class="op">(</span>new_lon<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/lag.html">lag</a></span><span class="op">(</span><span class="va">lon_dec</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">rowwise</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">mutate</span><span class="op">(</span>coord_dif<span class="op">=</span><span class="fu">distm</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">lon_dec</span>, <span class="va">lat_dec</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">new_lon</span>, <span class="va">new_lat</span><span class="op">)</span>, fun <span class="op">=</span> <span class="va">distHaversine</span><span class="op">)</span><span class="op">)</span>
+
+<span class="va">distance_df</span> <span class="op">%&gt;%</span> 
+  <span class="fu">group_by</span><span class="op">(</span><span class="va">Flight</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+   <span class="fu">mutate</span><span class="op">(</span>time<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/as.POSIXlt.html">as.POSIXct</a></span><span class="op">(</span><span class="va">time</span>,format<span class="op">=</span><span class="st">"%H:%M:%S"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">coord_dif</span><span class="op">&lt;</span><span class="fl">250</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span><span class="va">time</span>,<span class="va">coord_dif</span>,colour<span class="op">=</span><span class="va">gps_speed</span><span class="op">)</span><span class="op">)</span><span class="op">+</span>
+  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span><span class="op">+</span>
+  <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span><span class="op">+</span>
+  <span class="fu">scale_colour_gradientn</span><span class="op">(</span>colours <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html">terrain.colors</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span><span class="op">+</span>
+  <span class="fu">labs</span><span class="op">(</span>y<span class="op">=</span><span class="st">"distance (m) between points"</span><span class="op">)</span><span class="op">+</span>
+  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">Flight</span>, scales<span class="op">=</span><span class="st">"free"</span><span class="op">)</span></code></pre></div>
+<p><img src="Flight_summaries_files/figure-html/unnamed-chunk-9-1.png" width="700"></p>
+</div>
+<div id="overlap" class="section level2">
+<h2 class="hasAnchor">
+<a href="#overlap" class="anchor"></a>Overlap</h2>
+<p>The forward overlap is the percentage overlap that two consecutive images have.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">over</span><span class="op">=</span><span class="va">distance_df</span> <span class="op">%&gt;%</span> 
+<span class="fu">group_by</span><span class="op">(</span><span class="va">Flight</span><span class="op">)</span> <span class="op">%&gt;%</span>
+<span class="fu">rowwise</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+<span class="fu">mutate</span><span class="op">(</span>overlap<span class="op">=</span><span class="fu">Kulan</span><span class="fu">::</span><span class="fu"><a href="../reference/oforward.html">oforward</a></span><span class="op">(</span> dforwar<span class="op">=</span><span class="va">coord_dif</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>,H<span class="op">=</span><span class="va">alt_above_ground</span> <span class="op">)</span><span class="op">)</span>
+
+<span class="va">over</span> <span class="op">%&gt;%</span>
+  <span class="fu">mutate</span><span class="op">(</span>overlap<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">overlap</span><span class="op">&lt;</span><span class="fl">0</span>,<span class="fl">0</span>,<span class="va">overlap</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="co"># this makes any overlap less than 0 == 0</span>
+  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span><span class="va">overlap</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> 
+  <span class="fu">geom_histogram</span><span class="op">(</span>fill<span class="op">=</span><span class="st">"blue"</span><span class="op">)</span><span class="op">+</span>
+  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">Flight</span><span class="op">)</span></code></pre></div>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<pre><code>## Warning: Removed 8 rows containing non-finite values (stat_bin).</code></pre>
+<p><img src="Flight_summaries_files/figure-html/unnamed-chunk-10-1.png" width="700"></p>
+<p>The mean overlap per Flight is</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">over</span> <span class="op">%&gt;%</span>
+  <span class="fu">mutate</span><span class="op">(</span>overlap<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">overlap</span><span class="op">&lt;</span><span class="fl">0</span>,<span class="fl">0</span>,<span class="va">overlap</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="co"># this makes any overlap less than 0 == 0</span>
+  <span class="fu">group_by</span><span class="op">(</span><span class="va">Flight</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">summarise</span><span class="op">(</span>mnOver<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">overlap</span>, na.rm<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code>## # A tibble: 8 x 2
+##   Flight  mnOver
+## * &lt;chr&gt;    &lt;dbl&gt;
+## 1 Flight1   22.9
+## 2 Flight2   23.7
+## 3 Flight3   21.1
+## 4 Flight4   21.9
+## 5 Flight5   22.8
+## 6 Flight6   26.6
+## 7 Flight7   28.3
+## 8 Flight8   28.7</code></pre>
 </div>
 <div id="ground-surface-resolution" class="section level2">
 <h2 class="hasAnchor">
 <a href="#ground-surface-resolution" class="anchor"></a>Ground surface resolution</h2>
-<p><strong>NEED TO TEST THIS FUNCTION AS I AM NOT CONVINCED IT IS WORKING AS EXPECTED</strong></p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<p><em>NEED TO TEST THIS FUNCTION</em></p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">GSR_all_dfs</span><span class="op">=</span><span class="va">all_dfs_reduced</span> <span class="op">%&gt;%</span> 
   <span class="fu">rowwise</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">mutate</span><span class="op">(</span><span class="st">"GSR"</span><span class="op">=</span><span class="fu"><a href="../reference/get_GSD_dist.html">get_GSD_dist</a></span><span class="op">(</span>Altitude <span class="op">=</span> <span class="va">alt_above_ground</span>, Angle <span class="op">=</span> <span class="va">banking_angle</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">select</span><span class="op">(</span><span class="va">GSR</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">group_by</span><span class="op">(</span><span class="va">Flight</span><span class="op">)</span> </code></pre></div>
-<pre><code>## Adding missing grouping variables: `Flight`</code></pre>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">df</span><span class="op">=</span><span class="va">GSR_all_dfs</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span><span class="st">"GSR"</span><span class="op">=</span><span class="fu"><a href="../reference/get_GSD_dist.html">get_GSD_dist</a></span><span class="op">(</span>Altitude <span class="op">=</span> <span class="va">alt_above_ground</span>, Angle <span class="op">=</span> <span class="va">banking_angle</span><span class="op">)</span><span class="op">)</span>
+ 
+
+<span class="va">df</span><span class="op">=</span><span class="va">GSR_all_dfs</span> <span class="op">%&gt;%</span> 
   <span class="fu">group_by</span><span class="op">(</span><span class="va">Flight</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">group_split</span><span class="op">(</span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="st">"Flight"</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Flight1"</span>,<span class="st">"Flight2"</span>,<span class="st">"Flight3"</span>,<span class="st">"Flight4"</span>,<span class="st">"Flight5"</span>,<span class="st">"Flight6"</span>,<span class="st">"Flight7"</span>,<span class="st">"Flight8"</span><span class="op">)</span>, <span class="st">"GSDh"</span><span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">df</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">GSR</span><span class="op">$</span><span class="va">GSDh</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">df</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">GSR</span><span class="op">$</span><span class="va">GSDh</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">df</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">GSR</span><span class="op">$</span><span class="va">GSDh</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">df</span><span class="op">[[</span><span class="fl">4</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">GSR</span><span class="op">$</span><span class="va">GSDh</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">df</span><span class="op">[[</span><span class="fl">5</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">GSR</span><span class="op">$</span><span class="va">GSDh</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">df</span><span class="op">[[</span><span class="fl">6</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">GSR</span><span class="op">$</span><span class="va">GSDh</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">df</span><span class="op">[[</span><span class="fl">7</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">GSR</span><span class="op">$</span><span class="va">GSDh</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">df</span><span class="op">[[</span><span class="fl">8</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">GSR</span><span class="op">$</span><span class="va">GSDh</span><span class="op">)</span><span class="op">)</span>,<span class="st">"GSDw"</span><span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">df</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">GSR</span><span class="op">$</span><span class="va">GSDw</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">df</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">GSR</span><span class="op">$</span><span class="va">GSDw</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">df</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">GSR</span><span class="op">$</span><span class="va">GSDw</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">df</span><span class="op">[[</span><span class="fl">4</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">GSR</span><span class="op">$</span><span class="va">GSDw</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">df</span><span class="op">[[</span><span class="fl">5</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">GSR</span><span class="op">$</span><span class="va">GSDw</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">df</span><span class="op">[[</span><span class="fl">6</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">GSR</span><span class="op">$</span><span class="va">GSDw</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">df</span><span class="op">[[</span><span class="fl">7</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">GSR</span><span class="op">$</span><span class="va">GSDw</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">df</span><span class="op">[[</span><span class="fl">8</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">GSR</span><span class="op">$</span><span class="va">GSDw</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>##    Flight     GSDh     GSDw
-## 1 Flight1 3.000549 2.918668
-## 2 Flight2 3.018567 2.936194
-## 3 Flight3 2.871173 2.792822
-## 4 Flight4 2.928632 2.848713
-## 5 Flight5 2.950589 2.870072
-## 6 Flight6 2.811929 2.735195
-## 7 Flight7 2.975781 2.894575
-## 8 Flight8 2.835473 2.758097</code></pre>
+## 1 Flight1 2.974120 2.892960
+## 2 Flight2 2.996172 2.914411
+## 3 Flight3 2.853114 2.775256
+## 4 Flight4 2.918282 2.838646
+## 5 Flight5 2.919973 2.840291
+## 6 Flight6 2.795217 2.718939
+## 7 Flight7 2.968742 2.887729
+## 8 Flight8 2.812696 2.735941</code></pre>
 </div>
-<div id="overlap" class="section level2">
+<div id="area-two-sides-of-each-image" class="section level2">
 <h2 class="hasAnchor">
-<a href="#overlap" class="anchor"></a>Overlap</h2>
-<p>To add</p>
-</div>
-<div id="distance-time" class="section level2">
-<h2 class="hasAnchor">
-<a href="#distance-time" class="anchor"></a>Distance &amp; time</h2>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">geosphere</span><span class="op">)</span></code></pre></div>
-<pre><code>## Warning: package 'geosphere' was built under R version 4.0.4</code></pre>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">all_dfs_reduced</span><span class="op">$</span><span class="va">lat_dec</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></code></pre></div>
-<pre><code>## [1] 45.74383</code></pre>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">all_dfs_reduced</span><span class="op">$</span><span class="va">lat_dec</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span></code></pre></div>
-<pre><code>## [1] 45.74347</code></pre>
+<a href="#area-two-sides-of-each-image" class="anchor"></a>Area (two sides) of each image</h2>
+<p><em>Does not take in to account angle</em></p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">all_dfs_reduced</span><span class="op">$</span><span class="va">lon_dec</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></code></pre></div>
-<pre><code>## [1] 61.26042</code></pre>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">all_dfs_reduced</span><span class="op">$</span><span class="va">lon_dec</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span></code></pre></div>
-<pre><code>## [1] 61.26138</code></pre>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/geosphere/man/distm.html">distm</a></span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">all_dfs_reduced</span><span class="op">$</span><span class="va">lat_dec</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,
-<span class="va">all_dfs_reduced</span><span class="op">$</span><span class="va">lat_dec</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">all_dfs_reduced</span><span class="op">$</span><span class="va">lon_dec</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,
-<span class="va">all_dfs_reduced</span><span class="op">$</span><span class="va">lon_dec</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span>, fun <span class="op">=</span> <span class="va">distHaversine</span><span class="op">)</span></code></pre></div>
-<pre><code>##         [,1]
-## [1,] 1998363</code></pre>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">all_dfs_reduced</span> <span class="op">%&gt;%</span> 
-  <span class="fu">mutate</span><span class="op">(</span>time<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/as.POSIXlt.html">as.POSIXct</a></span><span class="op">(</span><span class="va">time</span>,format<span class="op">=</span><span class="st">"%H:%M:%S"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-<span class="fu">group_by</span><span class="op">(</span><span class="va">Flight</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">mutate</span><span class="op">(</span><span class="st">"T_diff"</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/difftime.html">difftime</a></span><span class="op">(</span><span class="va">time</span>,<span class="fu"><a href="https://rdrr.io/r/stats/lag.html">lag</a></span><span class="op">(</span><span class="va">time</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu">mutate</span><span class="op">(</span><span class="st">"T_diff2"</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">T_diff</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">drop_na</span><span class="op">(</span><span class="va">T_diff2</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">mutate</span><span class="op">(</span><span class="st">"time_cum"</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/cumsum.html">cumsum</a></span><span class="op">(</span><span class="va">T_diff2</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">mutate</span><span class="op">(</span>row_n<span class="op">=</span><span class="fu">row_number</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span><span class="va">time_cum</span>, <span class="va">row_n</span>,colour<span class="op">=</span><span class="va">Flight</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span><span class="op">+</span>
-  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">Flight</span><span class="op">)</span><span class="op">+</span>
-  <span class="fu">labs</span><span class="op">(</span>x<span class="op">=</span><span class="st">"Cummulative time in seconds"</span>, y<span class="op">=</span><span class="st">"number of images"</span><span class="op">)</span><span class="op">+</span>
-  <span class="fu">ggthemes</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ggthemes/man/theme_clean.html">theme_clean</a></span><span class="op">(</span><span class="op">)</span><span class="op">+</span>
-  <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"None"</span><span class="op">)</span></code></pre></div>
-<p><img src="Flight_summaries_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
+  <span class="fu">mutate</span><span class="op">(</span>side1<span class="op">=</span><span class="fu"><a href="../reference/Image_sides.html">Image_sides</a></span><span class="op">(</span><span class="va">alt_above_ground</span><span class="op">)</span><span class="op">$</span><span class="va">side1</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>side2<span class="op">=</span><span class="fu"><a href="../reference/Image_sides.html">Image_sides</a></span><span class="op">(</span><span class="va">alt_above_ground</span><span class="op">)</span><span class="op">$</span><span class="va">side2</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">group_by</span><span class="op">(</span><span class="va">Flight</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">summarise</span><span class="op">(</span>Side1<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">side1</span>, na.rm<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span>, Side2<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">side2</span>, na.rm<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code>## # A tibble: 8 x 3
+##   Flight  Side1 Side2
+## * &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt;
+## 1 Flight1  270.  282.
+## 2 Flight2  272.  284.
+## 3 Flight3  259.  270.
+## 4 Flight4  265.  277.
+## 5 Flight5  265.  277.
+## 6 Flight6  254.  265.
+## 7 Flight7  269.  281.
+## 8 Flight8  255.  267.</code></pre>
 </div>
   </div>
 

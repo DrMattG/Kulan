@@ -15,7 +15,9 @@ library(readr)
 library(qwraps2)
 library(Kulan)
 library(ggpubr)
+library(geosphere)
 ```
+
 
 ## Gather all the Flights in to a single dataset
 
@@ -23,7 +25,7 @@ library(ggpubr)
 library(here)
 #here::here()
 path=paste0(here::here(),"/", "data/tables")
-list.files(path)
+#list.files(path)
 all_dfs=Kulan::get_tables(path, ".csv")
 all_dfs=all_dfs %>% 
   janitor::clean_names() %>% 
@@ -33,13 +35,16 @@ all_dfs=all_dfs %>%
 
 ## Draw the flight paths
 
-```{r}
+```{r,fig.width = 12, fig.asp = .62}
 all_dfs %>% 
   ggplot(aes(lat_dec,lon_dec, colour=Flight))+
   geom_line()+
   labs(x="Decimal Latitude", y="Decimal Longitude")+
+  facet_wrap(~Flight, scales = "free") + 
   theme_bw()
 ```
+
+At this point you could add the altitude from the DEM [see the "Getting raster values form a Digital Elevation Model" vignette]. Here, for this example, we will use the column called Altitude above the ground (*because we can not include all the DEMs we would need inside the package*).
 
 ## Strip-width summary
 
@@ -73,39 +78,146 @@ all_dfs %>%
   geom_point()+
   theme(legend.position = "None")+
   facet_wrap(~Flight)
+
 ```
 
-The take-off and landing phases are clear from the plot. We could use the quantiles of each flight to automate the removal these points.
+From the distribution of the altitudes we can see that anything below 200 m is probably take-off or landing phase. 
 
 ```{r}
 all_dfs %>% 
-  group_by(Flight) %>% 
-  summarise(quants = quantile(alt_above_ground, probs = c(0.2), na.rm=TRUE))->quants
-
-df3 <- data.frame(Flight=unique(all_dfs$Flight),threshold=quants,stringsAsFactors = FALSE)
-
-all_dfs_reduced=all_dfs %>% 
-  group_by(Flight) %>% 
-  inner_join(df3) %>% 
-    filter(alt_above_ground>threshold.quants)
-
-all_dfs_reduced%>% 
-  ggplot(aes(time, alt_above_ground, colour=Flight)) +
-  labs(y= "Altitude above sea level")+
-  geom_point()
+  ggplot(aes(alt_above_ground))+
+  geom_histogram(fill="Red")
 ```
 
-## Ground surface resolution 
+However, we might want to look more closely at Flight5 as it seems some of the points during the flight are below 200m.
 
-**NEED TO TEST THIS FUNCTION AS I AM NOT CONVINCED IT IS WORKING AS EXPECTED**
+```{r}
+all_dfs %>% 
+  filter(Flight=="Flight5") %>% 
+  ggplot(aes(time, alt_above_ground, colour=Flight)) +
+  labs(y= "Altitude above sea level")+
+  theme(axis.text.x = element_blank())+
+  geom_point()+
+  geom_hline(yintercept = 200, colour="Red", lty=2) +
+  geom_hline(yintercept = 190, colour="Green", lty=2) +
+  theme(legend.position = "None")
+
+```
+
+So a couple of points in Flight5 during the actual flight were below our threshold of 200m. So let's be conservative and go for 190m instead. 
+
+```{r}
+all_dfs_reduced=all_dfs %>% 
+  filter(alt_above_ground>190)
+```
+
+Now all the points in consideration are above 190m.Let's re-run the strip-width summary.
+
+```{r, results='asis', echo=FALSE,, message=FALSE, warning=FALSE}
+all_dfs_reduced=all_dfs_reduced%>% 
+    group_by(Flight) %>%
+  filter(!str_detect(photo_no, "IMG")) %>% # remove empty photos
+  rowwise() %>% 
+  mutate("grd_in_img"=Kulan::grd_in_img(alt_above_ground))
+ our_summary2 <-
+  list("strip width" =
+         list("min"       = ~ round(min(grd_in_img)),
+              "max"       = ~ round(max(grd_in_img)),
+              "mean (sd)" = ~ qwraps2::mean_sd(grd_in_img)))
+
+
+tab_1<-qwraps2::summary_table(dplyr::group_by(all_dfs_reduced, Flight),our_summary2)
+tab_1
+
+```
+
+
+## Speed summary
+
+Using the gps_speed we can plot the speed of the drone during each flight.
+
+```{r}
+
+all_dfs_reduced%>% 
+  mutate(rowid=row_number()) %>% 
+  mutate(time=as.POSIXct(time,format="%H:%M:%S")) %>% 
+  ggplot(aes(time,gps_speed,colour=alt_above_ground))+
+  geom_point()+
+  geom_line()+
+    facet_wrap(~Flight, scales="free")
+```
+
+## Distance between points summary
+
+There are some very large distances moved at the start or the end of a Flight and these need to be filtered out to allow us to plot the distance more clearly. Anything above 250m is therefore removed in the plotting code below.The points are coloured by the gps_speed. 
+
+```{r}
+distance_df=all_dfs_reduced%>% 
+  group_by(Flight) %>% 
+  mutate(new_lat=lag(lat_dec)) %>%
+  mutate(new_lon=lag(lon_dec)) %>%
+  rowwise() %>%
+  mutate(coord_dif=distm(c(lon_dec, lat_dec), c(new_lon, new_lat), fun = distHaversine))
+
+distance_df %>% 
+  group_by(Flight) %>% 
+   mutate(time=as.POSIXct(time,format="%H:%M:%S")) %>% 
+  filter(coord_dif<250) %>% 
+  ggplot(aes(time,coord_dif,colour=gps_speed))+
+  geom_point()+
+  geom_line()+
+  scale_colour_gradientn(colours = terrain.colors(10))+
+  labs(y="distance (m) between points")+
+  facet_wrap(~Flight, scales="free")
+```
+
+
+
+## Overlap
+
+The forward overlap is the percentage overlap that two consecutive images have. 
+
+```{r}
+over=distance_df %>% 
+group_by(Flight) %>%
+rowwise() %>% 
+mutate(overlap=Kulan::oforward( dforwar=coord_dif[,1],H=alt_above_ground ))
+
+over %>%
+  mutate(overlap=ifelse(overlap<0,0,overlap)) %>% # this makes any overlap less than 0 == 0
+  ggplot(aes(overlap)) + 
+  geom_histogram(fill="blue")+
+  facet_wrap(~Flight)
+
+```
+
+
+
+
+The mean overlap per Flight is
 
 
 ```{r}
+over %>%
+  mutate(overlap=ifelse(overlap<0,0,overlap)) %>% # this makes any overlap less than 0 == 0
+  group_by(Flight) %>% 
+  summarise(mnOver=mean(overlap, na.rm=TRUE))
+
+```
+
+
+
+## Ground surface resolution 
+
+*NEED TO TEST THIS FUNCTION*
+
+
+```{r}
+
 GSR_all_dfs=all_dfs_reduced %>% 
   rowwise() %>% 
-  mutate("GSR"=get_GSD_dist(Altitude = alt_above_ground, Angle = banking_angle)) %>% 
-  select(GSR) %>% 
-  group_by(Flight) 
+  mutate("GSR"=get_GSD_dist(Altitude = alt_above_ground, Angle = banking_angle))
+ 
 
 df=GSR_all_dfs %>% 
   group_by(Flight) %>% 
@@ -115,40 +227,18 @@ data.frame("Flight"=c("Flight1","Flight2","Flight3","Flight4","Flight5","Flight6
 
 ```
 
-## Overlap
 
-To add
+## Area (two sides) of each image
 
-## Distance & time
-
-```{r}
-library(geosphere)
-all_dfs_reduced$lat_dec[1]
-all_dfs_reduced$lat_dec[2]
-all_dfs_reduced$lon_dec[1]
-all_dfs_reduced$lon_dec[2]
-
-distm (c(all_dfs_reduced$lat_dec[1],
-all_dfs_reduced$lat_dec[2]), c(all_dfs_reduced$lon_dec[1],
-all_dfs_reduced$lon_dec[2]), fun = distHaversine)
-
-```
+*Does not take in to account angle*
 
 ```{r}
 all_dfs_reduced %>% 
-  mutate(time=as.POSIXct(time,format="%H:%M:%S")) %>% 
-group_by(Flight) %>% mutate("T_diff"=difftime(time,lag(time))) %>%
-  mutate("T_diff2"=as.numeric(T_diff)) %>% 
-  drop_na(T_diff2) %>% 
-  mutate("time_cum"=cumsum(T_diff2)) %>% 
-  mutate(row_n=row_number()) %>% 
-  ggplot(aes(time_cum, row_n,colour=Flight)) +
-  geom_line()+
-  facet_wrap(~Flight)+
-  labs(x="Cummulative time in seconds", y="number of images")+
-  ggthemes::theme_clean()+
-  theme(legend.position = "None")
-  
-  
+  mutate(side1=Image_sides(alt_above_ground)$side1) %>% 
+  mutate(side2=Image_sides(alt_above_ground)$side2) %>%
+  group_by(Flight) %>%
+  summarise(Side1=mean(side1, na.rm=TRUE), Side2=mean(side2, na.rm=TRUE))
+
 ```
+
 

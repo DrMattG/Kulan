@@ -4,14 +4,19 @@
 #' @export
 
 # assume perpendicular to the ground
-ground_in_image<-function(alt, AOV){
+photo_area<-function(alt, AOV){
   gr_in_image<-(tan(AOV/2)*alt)*2
   return(gr_in_image)
 }
 
-ground_in_image(200,63/2*pi/180)
+photo_area(200,63/2*pi/180)
 
+#' Calculate the length of the sides of image
+#' @param alt = Drone altitude
+#' @export
 
+# Assume drone looking directly down
+# Specific to this drone
 #15% overlap
 
 #Camera: SONY DCS-RX1RM2
@@ -23,14 +28,18 @@ ground_in_image(200,63/2*pi/180)
 #Image height in pixel: 5304
 #Mounted on drone at 30o angle
 
-b=200 #height
-C=63/2*pi/180  #angle
-A=90*pi/180  #right angle
-B=A-C
+Image_sides=function(Altitude=Altitude){
+  b=Altitude #height
+  C=63/2*pi/180  #angle
+  A=90*pi/180  #right angle
+  B=A-C
+  a=b*(sin(A)/sin(B))
+  c=b*(sin(C)/sin(B))
+  side1=a
+  side2=c*2
+  df=data.frame(side1,side2)
+  return(df)
+
+}
 
 
-
-a=b*(sin(A)/sin(B))
-c=b*(sin(C)/sin(B))
-a
-c*2
