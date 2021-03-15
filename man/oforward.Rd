@@ -4,16 +4,16 @@
 \alias{oforward}
 \title{Calculate forward overlap}
 \usage{
-oforward(dforward = dforward, f = 35, H = H, w = 24)
+oforward(dforward, f = 35, H = H, w = 24)
 }
 \arguments{
-\item{dforward}{= distance between points where image was taken}
+\item{H.}{= Drone altitude}
 
-\item{H}{= Drone altitude}
+\item{dforward.}{= distance between points where image was taken}
 
-\item{f=}{focal length (35mm)}
+\item{f.=}{focal length (default = 35mm)}
 
-\item{w=}{sensor width (24mm)}
+\item{w.=}{sensor width (default = 24mm)}
 }
 \description{
 Calculate forward overlap

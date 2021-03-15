@@ -51,9 +51,9 @@ To calculate the width of a drone image we need to know the height of the drone 
 ```{r ground in image}
 df<-df %>%
   rowwise() %>%
-  mutate("grd_in_img"=Kulan::grd_in_img(`alt_above_ground`)) 
+  mutate("strip_width"=Kulan::get_strip_width(`alt_above_ground`)) 
 
-mean(df$grd_in_img)
+mean(df$strip_width)
 ```
 
 **Get the ground surface distance**

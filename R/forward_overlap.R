@@ -1,8 +1,8 @@
 #' Calculate forward overlap
-#' @param H = Drone altitude
-#' @param dforward = distance between points where image was taken
-#' @param f= focal length (35mm)
-#' @param w= sensor width (24mm)
+#' @param H. = Drone altitude
+#' @param dforward. = distance between points where image was taken
+#' @param f.= focal length (default = 35mm)
+#' @param w.= sensor width (default = 24mm)
 #' @references \url{https://doi.org/10.3390/rs11101252}
 #' @export
 
@@ -18,7 +18,7 @@
 
 #oforward=(1-((dforward*f)/(H*w)))*100
 
-oforward=function(dforward=dforward, f= 35, H=H, w=24){
+oforward=function(dforward, f= 35, H=H, w=24){
   oforward=(1-((dforward*f)/(H*w)))*100
 }
 

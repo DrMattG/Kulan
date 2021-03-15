@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function reference • Kulan</title>
+<title>Calculate the strip width (two cameras on the drone) — get_strip_width • Kulan</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,8 @@
 
 
 
-<meta property="og:title" content="Function reference" />
+<meta property="og:title" content="Calculate the strip width (two cameras on the drone) — get_strip_width" />
+<meta property="og:description" content="Calculate the strip width (two cameras on the drone)" />
 
 
 
@@ -58,7 +59,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -118,126 +119,50 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Reference</h1>
+    <h1>Calculate the strip width (two cameras on the drone)</h1>
+    
+    <div class="hidden name"><code>get_strip_width.Rd</code></div>
     </div>
 
-    <table class="ref-index">
+    <div class="ref-description">
+    <p>Calculate the strip width (two cameras on the drone)</p>
+    </div>
 
-    <colgroup>
-      
-      <col class="alias" />
-      <col class="title" />
-    </colgroup>
+    <pre class="usage"><span class='fu'>get_strip_width</span><span class='op'>(</span>
+  <span class='va'>altitude</span>,
+  angle1 <span class='op'>=</span> <span class='fl'>25</span>,
+  angle2 <span class='op'>=</span> <span class='fl'>25.7</span>,
+  distance_between_cameras <span class='op'>=</span> <span class='fl'>0.03</span>
+<span class='op'>)</span></pre>
 
-    <tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-          <p class="section-desc"></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="All_Flight_Left.html">All_Flight_Left</a></code> </p>
-        </td>
-        <td><p>Drone flight Left</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="All_Flight_Right.html">All_Flight_Right</a></code> </p>
-        </td>
-        <td><p>Drone flight Right</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="get_GSD.html">get_GSD()</a></code> </p>
-        </td>
-        <td><p>Calculate the ground surface distance</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="get_GSD_dist.html">get_GSD_dist()</a></code> </p>
-        </td>
-        <td><p>Calculate the ground surface distance with angle distortion</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="get_strip_width.html">get_strip_width()</a></code> </p>
-        </td>
-        <td><p>Calculate the strip width (two cameras on the drone)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="get_tables.html">get_tables()</a></code> </p>
-        </td>
-        <td><p>Extract all csv files from a nested folder on your local computer</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="Image_sides.html">Image_sides()</a></code> </p>
-        </td>
-        <td><p>Calculate the length of the sides of image</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="jolly2.html">jolly2()</a></code> </p>
-        </td>
-        <td><p>Calculate Jolly II estimate and 95% Confidence Interval</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="oforward.html">oforward()</a></code> </p>
-        </td>
-        <td><p>Calculate forward overlap</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="photo_area.html">photo_area()</a></code> </p>
-        </td>
-        <td><p>Calculate the area of a drone image</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="run_kulan_model.html">run_kulan_model()</a></code> </p>
-        </td>
-        <td><p>Calculate Bayesian estimate and 95% HDI</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="sim_kulan_data.html">sim_kulan_data()</a></code> </p>
-        </td>
-        <td><p>Simulate a dataset</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="theme_dark_blue.html">theme_dark_blue()</a></code> </p>
-        </td>
-        <td><p>Theme choices: theme_publication https://github.com/koundy/ggplot_theme_Publication</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="theme_dark_grey.html">theme_dark_grey()</a></code> </p>
-        </td>
-        <td><p>Theme choices: theme_publication https://github.com/koundy/ggplot_theme_Publication</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="theme_Publication.html">theme_Publication()</a></code> </p>
-        </td>
-        <td><p>Theme choices: theme_publication https://github.com/koundy/ggplot_theme_Publication</p></td>
-      </tr>
-    </tbody>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>altitude</th>
+      <td><p>the height of the drone above the ground</p></td>
+    </tr>
+    <tr>
+      <th>angle1</th>
+      <td><p>the angle of camera1</p></td>
+    </tr>
+    <tr>
+      <th>angle2</th>
+      <td><p>the angle of camera2</p></td>
+    </tr>
+    <tr>
+      <th>distance_between_cameras</th>
+      <td><p>added value for the distance between cameras</p></td>
+    </tr>
     </table>
-  </div>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>distance along the ground</p>
+
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>
