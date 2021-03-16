@@ -21,7 +21,13 @@ Imports: VGAM,
           coda,
           MASS,
           HDInterval,
-          mcmcOutput
+          mcmcOutput,
+          readr,
+          qwraps2,
+          tidyverse,
+          ggpubr,
+          geosphere,
+          here
 Depends: 
     R (>= 2.10)
 Suggests: 
