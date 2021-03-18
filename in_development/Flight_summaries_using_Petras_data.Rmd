@@ -1,10 +1,7 @@
 ---
 title: "Flight summaries"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Flight summaries}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+output: rmarkdown::html_document
+
 ---
 
 ```{r setup, include=FALSE}
@@ -16,44 +13,31 @@ library(qwraps2)
 library(Kulan)
 library(ggpubr)
 library(geosphere)
-```
-
-
-## Gather all the Flights in to a single dataset
-
-```{r make a large dataset, echo=TRUE, message=FALSE, warning=FALSE}
 library(here)
-#here::here()
-path=paste0(here::here(),"/", "data/tables")
-#list.files(path)
-all_dfs=Kulan::get_tables(path, ".csv")
-all_dfs=all_dfs %>% 
-  janitor::clean_names() %>% 
-  rename(., Flight = class)
-
-# 1899 time format fix
-#all_dfs=all_dfs %>% 
-#  mutate(
- #   time = format(time, "%H:%M %S")
-  #  ) # fix time format
-
-  
 ```
 
-## Draw the flight paths for all flights
+## Read in Petra's data
+
+>Need to tidy the dataframe as it comes in to R in a strange format. I am using the here package. When you run "library(here)" above you will see in your console a message that says: "here() starts at C:/Users.....". I put your data in a folder called "in_development". So you will need to change that bit of the code (just the last section) to your folder. OR you can just use the "path" approach. Also check the deliminator - excel on my computer changes "," to ";" and I need to use ";" as the deliminator in the read_delim function. 
 
 ```{r}
-library(leaflet)
-pal <- colorFactor(
-  palette = 'Dark2',
-  domain = all_dfs$Flight
-)
+df_e <- read_delim(paste0(here::here(),"/in_development/df_e.csv"),";", escape_double = FALSE, trim_ws = TRUE) # need to change the directory here to the correct path on your computer
+
+#df_e<_read_delim("path", "delim", escape_double = FALSE, trim_ws = TRUE)
+
+all_dfs=df_e %>%
+  select(!X1)# Drop the first column that has been imported from EXCEL - check that this is also the case for you
 
 
-leaflet(data=all_dfs[,c(5,4, 18)]) %>% 
-  addTiles() %>% 
-  addCircleMarkers(lng=~lon_dec, lat=~lat_dec, radius=2, color = ~pal(Flight))
+all_dfs=all_dfs %>% 
+  mutate(
+    time = format(time, "%H:%M %S")
+    ) # fix time format
+
+all_dfs
+
 ```
+
 
 
 ## Draw the flight paths for each flight
@@ -345,20 +329,20 @@ over %>%
 
 ## Ground surface resolution 
 
-*Need to check this function - I am using the formula from https://www.mdpi.com/2072-4292/11/10/1252/htm with cosine correction for angle*
+*Need to check this function*
 
 ```{r}
+
 GSR_all_dfs=all_dfs_reduced %>% 
   rowwise() %>% 
   mutate("GSR"=get_GSD_dist(Altitude = alt_above_ground, Angle = banking_angle))
-
-GSR_all_dfs$GSR 
+ 
 
 df=GSR_all_dfs %>% 
   group_by(Flight) %>% 
   group_split()
 
-resolution=data.frame("Flight"=c("Flight1","Flight2","Flight3","Flight4","Flight5","Flight6","Flight7","Flight8"), "DGS_far"= c(mean(df[[1]]$GSR$GSD),mean(df[[2]]$GSR$GSD),mean(df[[3]]$GSR$GSD),mean(df[[4]]$GSR$GSD),mean(df[[5]]$GSR$GSD),mean(df[[6]]$GSR$GSD),mean(df[[7]]$GSR$GSD),mean(df[[8]]$GSR$GSD)),"DGS_near"= c(mean(df[[1]]$GSR$GSDc),mean(df[[2]]$GSR$GSDc),mean(df[[3]]$GSR$GSDc),mean(df[[4]]$GSR$GSDc),mean(df[[5]]$GSR$GSDc),mean(df[[6]]$GSR$GSDc),mean(df[[7]]$GSR$GSDc),mean(df[[8]]$GSR$GSDc)))
+resolution=data.frame("Flight"=c("Flight1","Flight2","Flight3","Flight4","Flight5","Flight6","Flight7","Flight8"), "DGS_far"= c(mean(df[[1]]$GSR$GSDh),mean(df[[2]]$GSR$GSDh),mean(df[[3]]$GSR$GSDh),mean(df[[4]]$GSR$GSDh),mean(df[[5]]$GSR$GSDh),mean(df[[6]]$GSR$GSDh),mean(df[[7]]$GSR$GSDh),mean(df[[8]]$GSR$GSDh)),"DGS_near"= c(mean(df[[1]]$GSR$GSDw),mean(df[[2]]$GSR$GSDw),mean(df[[3]]$GSR$GSDw),mean(df[[4]]$GSR$GSDw),mean(df[[5]]$GSR$GSDw),mean(df[[6]]$GSR$GSDw),mean(df[[7]]$GSR$GSDw),mean(df[[8]]$GSR$GSDw)))
 
 ```
 
@@ -376,17 +360,11 @@ over_sum=over %>%
   group_by(Flight) %>% 
   summarise(Mean_Overlap=mean(overlap, na.rm=TRUE), SD_Overlap=sd(overlap, na.rm=TRUE))
 
-no_photos=all_dfs_reduced %>% 
-  group_by(Flight) %>% 
-  tally()
-
 output_summary_table=output_summary_table %>% inner_join(over_sum)
 
 output_summary_table=output_summary_table %>% inner_join(resolution)
 
-output_summary_table =output_summary_table %>% inner_join(no_photos)
-output_summary_table %>% 
-  rename(.,"no_of_photos"="n")
+output_summary_table 
 # You can write the table to .csv using this code below
 #write.csv(output_summary_table, "Summary_per_flight.csv")
 ```
@@ -409,38 +387,37 @@ Export_2_excel=over %>%
 Export_2_excel$DGS_near=GSR_all_dfs$GSR$GSDw
 Export_2_excel$DGS_far=GSR_all_dfs$GSR$GSDh
 
-names(Export_2_excel)<-c("photo_no",
-                         "date",
-                         "time",
-                         "lat_dec",
-                         "lon_dec",
-                         "alt_above_the_sea_level",
-                         "alt_above_launch_point",
-                         "alt_above_ground",
-                         "banking_angle",
-                         "tangage",
-                         "azimuth",
-                         "gps_course",
-                         "speed",
-                         "gps_speed",
-                         "camera_position",
-                         "species",
-                         "number",
-                         "Flight",
-                         "v18",
-                         "strip_width",
-                         "new_lat",
-                         "new_lon",
-                         "Distance_to_last_point",
-                         "overlap",
-                         "strip_width_1_side",
-                         "DGS_near",
-                         "DGS_far")         
+# names(Export_2_excel)<-c("photo_no",
+#                          "date",
+#                          "time",
+#                          "lat_dec",
+#                          "lon_dec",
+#                          "alt_above_the_sea_level",
+#                          "dem",
+#                          "alt_above_ground",
+#                          "banking_angle",
+#                          "tangage",
+#                          "azimuth",
+#                          "gps_course",
+#                          "speed",
+#                          "gps_speed",
+#                          "camera_position",
+#                          "species",
+#                          "number",
+#                          "Flight",
+#                          "strip_width",
+#                          "new_lat",
+#                          "new_lon",
+#                          "Distance_to_last_point",
+#                          "overlap",
+#                          "strip_width_1_side",
+#                          "DGS_near",
+#                          "DGS_far")         
 
 
 
 Export_2_excel=Export_2_excel %>% 
-  select(!c("v18","new_lat","new_lon",))# removes these coloumns as they are only used for calculating over values
+  select(!c("new_lat","new_lon",))# removes these columns as they are only used for calculating over values
 
 # You can write this table to excel by running this line (delete the "comment" '#' symbol)
 #write.csv(Export_2_excel, "Flight_data.csv")

@@ -34,8 +34,8 @@ get_GSD_dist<-function(Sensor_Height=24,Sensor_Width=35,Image_Width=7952,Image_H
   GSDw=((Altitude*100)*(Sensor_Width/10))/((Focal_Length/10)*Image_Width)
   GSDw
   GSD=max(GSDh,GSDw)
-  GSDc<-GSD*(cos(REdaS::deg2rad(Angle))^-1)
-  df=data.frame("GSDc"=GSDc, "GSDh"= GSDh, "GSDw"=GSDw)
+  GSDc<-GSD*(cos(REdaS::deg2rad(25*Angle))^-1)
+  df=data.frame("GSDc"=GSDc, GSD=max(GSDh,GSDw),"GSDh"= GSDh, "GSDw"=GSDw)
   return(df)}
 
-get_GSD_dist(Altitude = 10, Angle=0)
+#get_GSD_dist(Altitude = 229, Angle=-0.5)
