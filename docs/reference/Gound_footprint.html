@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Calculate forward overlap — oforward • Kulan</title>
+<title>Calculate the ground footprint — Gound_footprint • Kulan</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Calculate forward overlap — oforward" />
-<meta property="og:description" content="Calculate forward overlap" />
+<meta property="og:title" content="Calculate the ground footprint — Gound_footprint" />
+<meta property="og:description" content="Calculate the ground footprint" />
 
 
 
@@ -121,41 +121,41 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Calculate forward overlap</h1>
+    <h1>Calculate the ground footprint</h1>
     
-    <div class="hidden name"><code>oforward.Rd</code></div>
+    <div class="hidden name"><code>Gound_footprint.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Calculate forward overlap</p>
+    <p>Calculate the ground footprint</p>
     </div>
 
-    <pre class="usage"><span class='fu'>oforward</span><span class='op'>(</span><span class='va'>dforward</span>, f <span class='op'>=</span> <span class='fl'>35</span>, H <span class='op'>=</span> <span class='va'>H</span>, w <span class='op'>=</span> <span class='fl'>35.9</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>Gound_footprint</span><span class='op'>(</span>GSD <span class='op'>=</span> <span class='va'>GSD</span>, Image_Height <span class='op'>=</span> <span class='fl'>7952</span>, Image_Width <span class='op'>=</span> <span class='fl'>5304</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>H.</th>
-      <td><p>= Drone altitude</p></td>
+      <th>GSD</th>
+      <td><p>Spatial resolution</p></td>
     </tr>
     <tr>
-      <th>dforward.</th>
-      <td><p>= distance between points where image was taken</p></td>
+      <th>Image_Height</th>
+      <td><p>Height of image</p></td>
     </tr>
     <tr>
-      <th>f.=</th>
-      <td><p>focal length (default = 35mm)</p></td>
-    </tr>
-    <tr>
-      <th>w.=</th>
-      <td><p>sensor width (default = 35.9mm)</p></td>
+      <th>Image_Width</th>
+      <td><p>Width of image</p></td>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p><a href='https://doi.org/10.3390/rs11101252'>https://doi.org/10.3390/rs11101252</a></p>
+    <p>Ground footprint area (no angular distortion)</p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>This function calculates the ground footprint with no angular distortion. The width and the length of the sensor are separately multiplied by the ground sampling distance.
+Then the resulting width and length are multiplied to return the area of the image</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

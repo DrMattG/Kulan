@@ -13,7 +13,7 @@ oforward(dforward, f = 35, H = H, w = 35.9)
 
 \item{f.=}{focal length (default = 35mm)}
 
-\item{w.=}{sensor width (default = 24mm)}
+\item{w.=}{sensor width (default = 35.9mm)}
 }
 \description{
 Calculate forward overlap

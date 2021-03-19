@@ -14,7 +14,7 @@
 #Flight height: 200-250m
 #Image width in pixel: 7952
 #Image height in pixel: 5304
-#Mounted on drone at 30o angle
+
 
 #oforward=(1-((dforward*f)/(H*w)))*100
 

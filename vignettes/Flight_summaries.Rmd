@@ -340,25 +340,38 @@ over %>%
 ```
 
 
-## Ground surface resolution 
+## Ground surface resolution 1 
 
-*Need to check this function - I am using the formula from https://www.mdpi.com/2072-4292/11/10/1252/htm with cosine correction for angle*
+*Assuming no angle of distortion on the camera*
 
 ```{r}
 GSR_all_dfs=all_dfs_reduced %>% 
   rowwise() %>% 
-  mutate("GSR"=get_GSD_dist(Altitude = alt_above_ground, Angle = banking_angle))
+  mutate("GSR"=GSD(H=alt_above_ground))
 
-GSR_all_dfs$GSR 
-
-df=GSR_all_dfs %>% 
+GSR_all_dfs %>% 
   group_by(Flight) %>% 
-  group_split()
-
-resolution=data.frame("Flight"=c("Flight1","Flight2","Flight3","Flight4","Flight5","Flight6","Flight7","Flight8"), "DGS_far"= c(mean(df[[1]]$GSR$GSD),mean(df[[2]]$GSR$GSD),mean(df[[3]]$GSR$GSD),mean(df[[4]]$GSR$GSD),mean(df[[5]]$GSR$GSD),mean(df[[6]]$GSR$GSD),mean(df[[7]]$GSR$GSD),mean(df[[8]]$GSR$GSD)),"DGS_near"= c(mean(df[[1]]$GSR$GSDc),mean(df[[2]]$GSR$GSDc),mean(df[[3]]$GSR$GSDc),mean(df[[4]]$GSR$GSDc),mean(df[[5]]$GSR$GSDc),mean(df[[6]]$GSR$GSDc),mean(df[[7]]$GSR$GSDc),mean(df[[8]]$GSR$GSDc)))
+  summarise(mean_cm_per_pix=mean(GSR*100, na.rm=TRUE), sd_cm_per_pix=sd(GSR*100, na.rm=TRUE))
 
 ```
 
+
+```{r, echo=TRUE}
+resolution1=GSR_all_dfs %>% 
+  mutate(Fp=Ground_footprint(GSR)) %>% 
+   group_by(Flight) %>% 
+  summarise(mean_GF=mean(Fp, na.rm=TRUE), sd_GF=sd(Fp, na.rm=TRUE))
+resolution1
+
+  
+```
+
+
+## Ground surface resolution 2 
+
+*Assume angle of distortion on the camera*
+
+TBC
 
 ## Generate summary ouputs
 
@@ -379,7 +392,7 @@ no_photos=all_dfs_reduced %>%
 
 output_summary_table=output_summary_table %>% inner_join(over_sum)
 
-output_summary_table=output_summary_table %>% inner_join(resolution)
+output_summary_table=output_summary_table %>% inner_join(resolution1)
 
 output_summary_table =output_summary_table %>% inner_join(no_photos)
 output_summary_table %>% 
@@ -397,44 +410,11 @@ kableExtra::kable(output_summary_table) %>%
 ### Export to excel
 
 ```{r}
-#[the relevant values are: strip-width (one side)[in m], image footprint [in m2], distance to previous image [in m], overlap, DGS - ground resolution near [cm/pixel], DGS - ground resolution far [cm/pixel]).
-
 
 Export_2_excel=over %>% 
   mutate(strip_width_1_side=strip_width/2)
 
-Export_2_excel$DGS_near=GSR_all_dfs$GSR$GSDw
-Export_2_excel$DGS_far=GSR_all_dfs$GSR$GSDh
-
-names(Export_2_excel)<-c("photo_no",
-                         "date",
-                         "time",
-                         "lat_dec",
-                         "lon_dec",
-                         "alt_above_the_sea_level",
-                         "alt_above_launch_point",
-                         "alt_above_ground",
-                         "banking_angle",
-                         "tangage",
-                         "azimuth",
-                         "gps_course",
-                         "speed",
-                         "gps_speed",
-                         "camera_position",
-                         "species",
-                         "number",
-                         "Flight",
-                         "v18",
-                         "strip_width",
-                         "new_lat",
-                         "new_lon",
-                         "Distance_to_last_point",
-                         "overlap",
-                         "strip_width_1_side",
-                         "DGS_near",
-                         "DGS_far")         
-
-
+Export_2_excel$GSD=GSR_all_dfs$GSR
 
 Export_2_excel=Export_2_excel %>% 
   select(!c("v18","new_lat","new_lon",))# removes these coloumns as they are only used for calculating over values

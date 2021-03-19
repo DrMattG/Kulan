@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Calculate forward overlap — oforward • Kulan</title>
+<title>Ground sampling distance (Spatial Resolution) — GSD • Kulan</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Calculate forward overlap — oforward" />
-<meta property="og:description" content="Calculate forward overlap" />
+<meta property="og:title" content="Ground sampling distance (Spatial Resolution) — GSD" />
+<meta property="og:description" content="Calculates the ground sampling distance (spatial resolution). This version of the function ignores angular distortion" />
 
 
 
@@ -121,41 +121,48 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Calculate forward overlap</h1>
+    <h1>Ground sampling distance (Spatial Resolution)</h1>
     
-    <div class="hidden name"><code>oforward.Rd</code></div>
+    <div class="hidden name"><code>GSD.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Calculate forward overlap</p>
+    <p>Calculates the ground sampling distance (spatial resolution). This version of the function ignores angular distortion</p>
     </div>
 
-    <pre class="usage"><span class='fu'>oforward</span><span class='op'>(</span><span class='va'>dforward</span>, f <span class='op'>=</span> <span class='fl'>35</span>, H <span class='op'>=</span> <span class='va'>H</span>, w <span class='op'>=</span> <span class='fl'>35.9</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>GSD</span><span class='op'>(</span>f <span class='op'>=</span> <span class='fl'>35</span>, H <span class='op'>=</span> <span class='va'>Altitude</span>, pixel <span class='op'>=</span> <span class='fl'>4.5</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>H.</th>
-      <td><p>= Drone altitude</p></td>
+      <th>H</th>
+      <td><p>the height of the drone above the ground</p></td>
     </tr>
     <tr>
-      <th>dforward.</th>
-      <td><p>= distance between points where image was taken</p></td>
+      <th>pixel</th>
+      <td><p>pixel size in micrometers</p></td>
     </tr>
     <tr>
-      <th>f.=</th>
-      <td><p>focal length (default = 35mm)</p></td>
-    </tr>
-    <tr>
-      <th>w.=</th>
-      <td><p>sensor width (default = 35.9mm)</p></td>
+      <th>Focal_Length</th>
+      <td><p>Focal length</p></td>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p><a href='https://doi.org/10.3390/rs11101252'>https://doi.org/10.3390/rs11101252</a></p>
+    <p>Ground surface distance</p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>This version of the function assumes no angular distortion. The spatial resolution is calculated using the scale (focal length of the camera / Flying height above ground level). This equates to the sensor pixel size/ Ground pixel size. To calculate the ground sample distance we need to know the flying height, the camera sensor size and the lens focal length.</p>
+<p>Camera: SONY DCS-RX1RM2</p>
+<p>Sensor: 35.9 x 24.0 mm</p>
+<p>Viewing angle: (CORRESPONDING 35 MM FORMAT) 63 degrees (35mm))</p>
+<p>Focal length: 35mm</p>
+<p>Flight height: 200-250m</p>
+<p>Pixels: 4.5 micrometers</p>
+<p>Image width in pixels: 7952</p>
+<p>Image height in pixels: 5304</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

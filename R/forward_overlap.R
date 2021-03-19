@@ -2,7 +2,7 @@
 #' @param H. = Drone altitude
 #' @param dforward. = distance between points where image was taken
 #' @param f.= focal length (default = 35mm)
-#' @param w.= sensor width (default = 24mm)
+#' @param w.= sensor width (default = 35.9mm)
 #' @references \url{https://doi.org/10.3390/rs11101252}
 #' @export
 

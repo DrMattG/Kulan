@@ -45,7 +45,7 @@ GSD=function(f=35, H=Altitude, pixel=4.5){
 #' @return Ground footprint area (no angular distortion)
 #' @export
 
-Gound_footprint=function(GSD=GSD, Image_Height=7952, Image_Width=5304){
+Ground_footprint=function(GSD=GSD, Image_Height=7952, Image_Width=5304){
   W=Image_Width*GSD
   L=Image_Height*GSD
   Ground_footprint=W*L
