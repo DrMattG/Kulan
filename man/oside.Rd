@@ -4,7 +4,7 @@
 \alias{oside}
 \title{Calculate side overlap}
 \usage{
-oside(dside, f = 35, H = H, w = 24)
+oside(dside, f = 35, H = H, w = 35.9)
 }
 \arguments{
 \item{H.}{= Drone altitude}

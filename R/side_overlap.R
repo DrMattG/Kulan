@@ -18,7 +18,7 @@
 
 #oforward=(1-((dforward*f)/(H*w)))*100
 
-oside=function(dside, f= 35, H=H, w=24){
+oside=function(dside, f= 35, H=H, w=35.9){
   oside=(1-((dside*f)/(H*w)))*100
 }
 #(oside(0.3, H=300))

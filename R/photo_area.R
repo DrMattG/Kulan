@@ -9,7 +9,6 @@ photo_area<-function(alt, AOV){
   return(gr_in_image)
 }
 
-photo_area(200,63/2*pi/180)
 
 #' Calculate the length of the sides of image
 #' @param alt = Drone altitude
@@ -17,8 +16,7 @@ photo_area(200,63/2*pi/180)
 
 # Assume drone looking directly down
 # Specific to this drone
-#15% overlap
-
+# 15% overlap?
 #Camera: SONY DCS-RX1RM2
 #Sensor: 35.9 x 24.0 mm
 #VIEWING ANGLE LENS (CORRESPONDING 35 MM FORMAT) 63 degrees (35mm))
@@ -26,7 +24,7 @@ photo_area(200,63/2*pi/180)
 #Flight height: 200-250m
 #Image width in pixel: 7952
 #Image height in pixel: 5304
-#Mounted on drone at 30o angle
+
 
 Image_sides=function(Altitude=Altitude){
   b=Altitude #height

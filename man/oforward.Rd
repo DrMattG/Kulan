@@ -4,7 +4,7 @@
 \alias{oforward}
 \title{Calculate forward overlap}
 \usage{
-oforward(dforward, f = 35, H = H, w = 24)
+oforward(dforward, f = 35, H = H, w = 35.9)
 }
 \arguments{
 \item{H.}{= Drone altitude}

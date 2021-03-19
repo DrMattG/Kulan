@@ -1,7 +1,6 @@
 ---
 title: "Flight summaries"
-output: rmarkdown::html_document
-
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -13,8 +12,8 @@ library(qwraps2)
 library(Kulan)
 library(ggpubr)
 library(geosphere)
-library(here)
 ```
+
 
 ## Read in Petra's data
 
@@ -28,16 +27,28 @@ df_e <- read_delim(paste0(here::here(),"/in_development/df_e.csv"),";", escape_d
 all_dfs=df_e %>%
   select(!X1)# Drop the first column that has been imported from EXCEL - check that this is also the case for you
 
-
 all_dfs=all_dfs %>% 
   mutate(
-    time = format(time, "%H:%M %S")
+    time = format(time, "%H:%M:%S")
     ) # fix time format
-
-all_dfs
 
 ```
 
+
+## Draw the flight paths for all flights
+
+```{r}
+library(leaflet)
+pal <- colorFactor(
+  palette = 'Dark2',
+  domain = all_dfs$Flight
+)
+
+
+leaflet(data=all_dfs[,c(5,4, 18)]) %>% 
+  addTiles() %>% 
+  addCircleMarkers(lng=~lon_dec, lat=~lat_dec, radius=2, color = ~pal(Flight))
+```
 
 
 ## Draw the flight paths for each flight
@@ -151,6 +162,7 @@ tab_1
 ### First plot the data
 
 ```{r}
+
 all_dfs %>% 
   ggplot(aes(time, alt_above_ground, colour=Flight)) +
   labs(y= "Altitude above ground")+
@@ -212,12 +224,14 @@ tab_1
 ```
 ## Altitude above ground summary
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
+
 all_dfs_reduced %>% 
-   mutate(time=as.POSIXct(time,format="%H:%M:%S")) %>% 
-  ggplot(aes(time,alt_above_ground))+
+   mutate(time2=as.POSIXct(time,format="%H:%M:%S")) %>% 
+  ggplot(aes(time2,alt_above_ground))+
   geom_point(colour="darkblue")+
-  geom_line(colour="darkblue")+
+  geom_line(colour="darkblue", group=1)+
+  labs(x="time", y="Altitude above the ground")+
   facet_wrap(Flight~., scale="free")
 
 ```
@@ -231,11 +245,12 @@ Using the gps_speed we can plot the speed of the drone during each flight.
 
 all_dfs_reduced%>% 
   mutate(rowid=row_number()) %>% 
-  mutate(time=as.POSIXct(time,format="%H:%M:%S")) %>% 
-  #ggplot(aes(time,gps_speed))+# replace the next line with this to remove the alt_above_ground colour
-  ggplot(aes(time,gps_speed,colour=alt_above_ground))+
+  mutate(time2=as.POSIXct(time,format="%H:%M:%S")) %>% 
+  #ggplot(aes(time2,gps_speed))+# replace the next line with this to remove the alt_above_ground colour
+  ggplot(aes(time2,gps_speed,colour=alt_above_ground))+
   geom_point()+
   geom_line()+
+  labs(x="time", y= "gps speed")+
   #geom_point(colour="darkblue")+# add these lines too and remove the two above
   #geom_line(colour="darkblue")+#
   facet_wrap(~Flight, scales="free")
@@ -255,13 +270,13 @@ distance_df=all_dfs_reduced%>%
 
 distance_df %>% 
   group_by(Flight) %>% 
-   mutate(time=as.POSIXct(time,format="%H:%M:%S")) %>% 
+  mutate(time2=as.POSIXct(time,format="%H:%M:%S")) %>% 
   filter(coord_dif<250) %>% 
-  ggplot(aes(time,coord_dif,colour=gps_speed))+
+  ggplot(aes(time2,coord_dif,colour=gps_speed))+
   geom_point()+
   geom_line()+
   scale_colour_gradientn(colours = terrain.colors(10))+
-  labs(y="distance (m) between points")+
+  labs(x= "time",y="distance (m) between points")+
   facet_wrap(~Flight, scales="free")
 ```
 
@@ -271,16 +286,13 @@ distance_df %>%
 ```{r}
 all_dfs_reduced%>% 
   mutate(rowid=row_number()) %>% 
-  mutate(time=as.POSIXct(time,format="%H:%M:%S")) %>% 
-  ggplot(aes(time,banking_angle))+
+  mutate(time2=as.POSIXct(time,format="%H:%M:%S")) %>% 
+  ggplot(aes(time2,banking_angle))+
   geom_point(colour="darkblue")+
   geom_line(colour="darkblue")+
+  labs(x="time", y="Banking angle")+
   facet_wrap(~Flight, scales="free")
 ```
-
-
-
-
 
 
 ## Overlap
@@ -329,20 +341,20 @@ over %>%
 
 ## Ground surface resolution 
 
-*Need to check this function*
+*Need to check this function - I am using the formula from https://www.mdpi.com/2072-4292/11/10/1252/htm with cosine correction for angle*
 
 ```{r}
-
 GSR_all_dfs=all_dfs_reduced %>% 
   rowwise() %>% 
   mutate("GSR"=get_GSD_dist(Altitude = alt_above_ground, Angle = banking_angle))
- 
+
+GSR_all_dfs$GSR 
 
 df=GSR_all_dfs %>% 
   group_by(Flight) %>% 
   group_split()
 
-resolution=data.frame("Flight"=c("Flight1","Flight2","Flight3","Flight4","Flight5","Flight6","Flight7","Flight8"), "DGS_far"= c(mean(df[[1]]$GSR$GSDh),mean(df[[2]]$GSR$GSDh),mean(df[[3]]$GSR$GSDh),mean(df[[4]]$GSR$GSDh),mean(df[[5]]$GSR$GSDh),mean(df[[6]]$GSR$GSDh),mean(df[[7]]$GSR$GSDh),mean(df[[8]]$GSR$GSDh)),"DGS_near"= c(mean(df[[1]]$GSR$GSDw),mean(df[[2]]$GSR$GSDw),mean(df[[3]]$GSR$GSDw),mean(df[[4]]$GSR$GSDw),mean(df[[5]]$GSR$GSDw),mean(df[[6]]$GSR$GSDw),mean(df[[7]]$GSR$GSDw),mean(df[[8]]$GSR$GSDw)))
+resolution=data.frame("Flight"=c("Flight1","Flight2","Flight3","Flight4","Flight5","Flight6","Flight7","Flight8"), "DGS_far"= c(mean(df[[1]]$GSR$GSD),mean(df[[2]]$GSR$GSD),mean(df[[3]]$GSR$GSD),mean(df[[4]]$GSR$GSD),mean(df[[5]]$GSR$GSD),mean(df[[6]]$GSR$GSD),mean(df[[7]]$GSR$GSD),mean(df[[8]]$GSR$GSD)),"DGS_near"= c(mean(df[[1]]$GSR$GSDc),mean(df[[2]]$GSR$GSDc),mean(df[[3]]$GSR$GSDc),mean(df[[4]]$GSR$GSDc),mean(df[[5]]$GSR$GSDc),mean(df[[6]]$GSR$GSDc),mean(df[[7]]$GSR$GSDc),mean(df[[8]]$GSR$GSDc)))
 
 ```
 
@@ -360,11 +372,17 @@ over_sum=over %>%
   group_by(Flight) %>% 
   summarise(Mean_Overlap=mean(overlap, na.rm=TRUE), SD_Overlap=sd(overlap, na.rm=TRUE))
 
+no_photos=all_dfs_reduced %>% 
+  group_by(Flight) %>% 
+  tally()
+
 output_summary_table=output_summary_table %>% inner_join(over_sum)
 
 output_summary_table=output_summary_table %>% inner_join(resolution)
 
-output_summary_table 
+output_summary_table =output_summary_table %>% inner_join(no_photos)
+output_summary_table %>% 
+  rename(.,"no_of_photos"="n")
 # You can write the table to .csv using this code below
 #write.csv(output_summary_table, "Summary_per_flight.csv")
 ```
@@ -378,8 +396,6 @@ kableExtra::kable(output_summary_table) %>%
 ### Export to excel
 
 ```{r}
-#[the relevant values are: strip-width (one side)[in m], image footprint [in m2], distance to previous image [in m], overlap, DGS - ground resolution near [cm/pixel], DGS - ground resolution far [cm/pixel]).
-
 
 Export_2_excel=over %>% 
   mutate(strip_width_1_side=strip_width/2)
@@ -387,37 +403,9 @@ Export_2_excel=over %>%
 Export_2_excel$DGS_near=GSR_all_dfs$GSR$GSDw
 Export_2_excel$DGS_far=GSR_all_dfs$GSR$GSDh
 
-# names(Export_2_excel)<-c("photo_no",
-#                          "date",
-#                          "time",
-#                          "lat_dec",
-#                          "lon_dec",
-#                          "alt_above_the_sea_level",
-#                          "dem",
-#                          "alt_above_ground",
-#                          "banking_angle",
-#                          "tangage",
-#                          "azimuth",
-#                          "gps_course",
-#                          "speed",
-#                          "gps_speed",
-#                          "camera_position",
-#                          "species",
-#                          "number",
-#                          "Flight",
-#                          "strip_width",
-#                          "new_lat",
-#                          "new_lon",
-#                          "Distance_to_last_point",
-#                          "overlap",
-#                          "strip_width_1_side",
-#                          "DGS_near",
-#                          "DGS_far")         
-
-
 
 Export_2_excel=Export_2_excel %>% 
-  select(!c("new_lat","new_lon",))# removes these columns as they are only used for calculating over values
+  select(!c("new_lat","new_lon"))# removes these columns as they are only used for calculating over values
 
 # You can write this table to excel by running this line (delete the "comment" '#' symbol)
 #write.csv(Export_2_excel, "Flight_data.csv")

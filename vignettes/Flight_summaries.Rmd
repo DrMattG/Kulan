@@ -31,13 +31,7 @@ all_dfs=all_dfs %>%
   janitor::clean_names() %>% 
   rename(., Flight = class)
 
-# 1899 time format fix
-#all_dfs=all_dfs %>% 
-#  mutate(
- #   time = format(time, "%H:%M %S")
-  #  ) # fix time format
 
-  
 ```
 
 ## Draw the flight paths for all flights
@@ -168,10 +162,10 @@ tab_1
 
 ```{r}
 all_dfs %>% 
-  ggplot(aes(time, alt_above_ground, colour=Flight)) +
-  labs(y= "Altitude above ground")+
-  theme(axis.text.x = element_blank())+
+  mutate(time2=as.POSIXct(time,format="%H:%M:%S")) %>% 
+  ggplot(aes(time2, alt_above_ground, colour=Flight))+ 
   geom_point()+
+  labs(x="time",y= "Altitude above ground")+
   theme(legend.position = "None")+
   facet_wrap(~Flight)
 
@@ -230,10 +224,11 @@ tab_1
 
 ```{r}
 all_dfs_reduced %>% 
-   mutate(time=as.POSIXct(time,format="%H:%M:%S")) %>% 
-  ggplot(aes(time,alt_above_ground))+
+   mutate(time2=as.POSIXct(time,format="%H:%M:%S")) %>% 
+  ggplot(aes(time2,alt_above_ground))+
   geom_point(colour="darkblue")+
   geom_line(colour="darkblue")+
+  labs(x="time", y="Altitude above the ground")+
   facet_wrap(Flight~., scale="free")
 
 ```
@@ -247,11 +242,12 @@ Using the gps_speed we can plot the speed of the drone during each flight.
 
 all_dfs_reduced%>% 
   mutate(rowid=row_number()) %>% 
-  mutate(time=as.POSIXct(time,format="%H:%M:%S")) %>% 
-  #ggplot(aes(time,gps_speed))+# replace the next line with this to remove the alt_above_ground colour
-  ggplot(aes(time,gps_speed,colour=alt_above_ground))+
+  mutate(time2=as.POSIXct(time,format="%H:%M:%S")) %>% 
+  #ggplot(aes(time2,gps_speed))+# replace the next line with this to remove the alt_above_ground colour
+  ggplot(aes(time2,gps_speed,colour=alt_above_ground))+
   geom_point()+
   geom_line()+
+  labs(x="time", y="gps speed")+
   #geom_point(colour="darkblue")+# add these lines too and remove the two above
   #geom_line(colour="darkblue")+#
   facet_wrap(~Flight, scales="free")
@@ -271,13 +267,13 @@ distance_df=all_dfs_reduced%>%
 
 distance_df %>% 
   group_by(Flight) %>% 
-   mutate(time=as.POSIXct(time,format="%H:%M:%S")) %>% 
+   mutate(time2=as.POSIXct(time,format="%H:%M:%S")) %>% 
   filter(coord_dif<250) %>% 
-  ggplot(aes(time,coord_dif,colour=gps_speed))+
+  ggplot(aes(time2,coord_dif,colour=gps_speed))+
   geom_point()+
   geom_line()+
   scale_colour_gradientn(colours = terrain.colors(10))+
-  labs(y="distance (m) between points")+
+  labs(x="time",y="distance (m) between points")+
   facet_wrap(~Flight, scales="free")
 ```
 
@@ -287,10 +283,11 @@ distance_df %>%
 ```{r}
 all_dfs_reduced%>% 
   mutate(rowid=row_number()) %>% 
-  mutate(time=as.POSIXct(time,format="%H:%M:%S")) %>% 
-  ggplot(aes(time,banking_angle))+
+  mutate(time2=as.POSIXct(time,format="%H:%M:%S")) %>% 
+  ggplot(aes(time2,banking_angle))+
   geom_point(colour="darkblue")+
   geom_line(colour="darkblue")+
+  labs(x="time", y="Banking angle")+
   facet_wrap(~Flight, scales="free")
 ```
 
