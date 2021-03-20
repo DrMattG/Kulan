@@ -1,0 +1,457 @@
+---
+title: "Flight summary"
+date:  "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(qwraps2_markup = "markdown")
+library(tidyverse)
+library(readr)
+library(qwraps2)
+library(Kulan)
+library(ggpubr)
+library(geosphere)
+library(leaflet)
+library(here)
+```
+
+## Flight summary template
+
+This is a RMarkdown template. You can replace the text to suite your needs. You can also adapt the code to your own data. The idea behind this template is to simplify and standardise the process of generating a report summarising key aspects of the drone flight. 
+
+RMarkdown is a format that allows you to write text and incorporate that with code or the outputs of code. To add code you need to write R code in a codeblock which can be added by clicking on the "insert" tab above and selecting "R". In addition you can add "inline" R code so that objects created in R are presented in the text. Here is a very quick example:
+
+Insert a code block:
+
+```{r This is a code block and you can write R code in it, echo=FALSE, warning=FALSE, message=FALSE}
+# The R code goes here. 
+D1=4
+D2=2
+
+D1+D2
+
+```
+In each code block you need a header between the curly brackets "{}" that starts with "r". Then you can add a title like I have done above or you can leave this blank. Importantly after this title (which needs to be unique for each code block) you need a "," and then you can tell RMarkdown what you want it to do with the code. There are many different commands but the most useful is "echo" which if "echo=TRUE" will print the code in the output. I tend to add "warning=FALSE, message=FALSE" to the code blocks to reduce R package warnings. 
+
+To use the object created in the code block you can use "inline" code. So for example we can write: 4 + 2 = `r D1+D2 `. This will print out the sum of object D1 and D2 created in the code block inside the text.
+
+To create a "report" once you are happy with the text and code in the RMarkdown document you can click on the "knit" button. This will run all the code blocks and then will create an output (currently set to a html file but there is an option for pdf or word. html is the most flexible format and works more naturally with R code, you may need to change some of the plotting functions to get them to look good in pdf format, for example). At any point you can also run the code in a block by clicking on the green button at the top of the code block. You can run all code blocks by clicking on run in the menu at the top of the page. It is important to remember that the code blocks are run sequentially so if you create an object in the second codeblock you could not make use of it until after that codeblock has run. 
+
+
+## Gather all the Flights in to a single dataset
+
+
+```{r make a large dataset, echo=TRUE, message=FALSE, warning=FALSE}
+
+#here::here()
+path=paste0(here::here(),"/", "data/tables")
+#list.files(path)
+all_dfs=Kulan::get_tables(path, ".csv")
+all_dfs=all_dfs %>% 
+  janitor::clean_names() %>% 
+  rename(., Flight = class)
+
+
+```
+
+## or load a already compiled dataset
+
+```{r}
+df_e <- read_delim(paste0(here::here(),"/in_development/df_e.csv"),";", escape_double = FALSE, trim_ws = TRUE) # need to change the directory here to the correct path on your computer
+
+#df_e<_read_delim("path", "delim", escape_double = FALSE, trim_ws = TRUE)
+
+all_dfs=df_e %>%
+  select(!X1)# Drop the first column that has been imported from EXCEL - check that this is also the case for you
+
+all_dfs=all_dfs %>% 
+  mutate(
+    time = format(time, "%H:%M:%S")
+    ) # fix time format
+
+```
+
+
+## Draw the flight paths for all flights
+
+```{r}
+
+pal <- colorFactor(
+  palette = 'Dark2',
+  domain = all_dfs$Flight
+)
+
+
+leaflet(data=all_dfs[,c(5,4, 18)]) %>% 
+  addTiles() %>% 
+  addCircleMarkers(lng=~lon_dec, lat=~lat_dec, radius=2, color = ~pal(Flight))
+```
+
+
+## Draw the flight paths for each flight
+
+```{r}
+
+ldat1=all_dfs %>% 
+  filter(Flight=="Flight1")
+leaflet(data=ldat1[,c(5,4)]) %>% 
+  addTiles() %>% 
+  addCircleMarkers(lng=~lon_dec, lat=~lat_dec, radius=2)
+```
+
+```{r}
+
+ldat1=all_dfs %>% 
+  filter(Flight=="Flight2")
+leaflet(data=ldat1[,c(5,4)]) %>% 
+  addTiles() %>% 
+  addCircleMarkers(lng=~lon_dec, lat=~lat_dec, radius=2)
+```
+
+
+```{r}
+
+ldat1=all_dfs %>% 
+  filter(Flight=="Flight3")
+leaflet(data=ldat1[,c(5,4)]) %>% 
+  addTiles() %>% 
+  addCircleMarkers(lng=~lon_dec, lat=~lat_dec, radius=2)
+```
+
+
+
+```{r}
+
+ldat1=all_dfs %>% 
+  filter(Flight=="Flight4")
+leaflet(data=ldat1[,c(5,4)]) %>% 
+  addTiles() %>% 
+  addCircleMarkers(lng=~lon_dec, lat=~lat_dec, radius=2)
+```
+
+
+```{r}
+
+
+ldat1=all_dfs %>% 
+  filter(Flight=="Flight5")
+leaflet(data=ldat1[,c(5,4)]) %>% 
+  addTiles() %>% 
+  addCircleMarkers(lng=~lon_dec, lat=~lat_dec, radius=2)
+```
+
+
+
+```{r}
+
+
+ldat1=all_dfs %>% 
+  filter(Flight=="Flight6")
+leaflet(data=ldat1[,c(5,4)]) %>% 
+  addTiles() %>% 
+  addCircleMarkers(lng=~lon_dec, lat=~lat_dec, radius=2)
+```
+
+
+```{r}
+
+ldat1=all_dfs %>% 
+  filter(Flight=="Flight7")
+leaflet(data=ldat1[,c(5,4)]) %>% 
+  addTiles() %>% 
+  addCircleMarkers(lng=~lon_dec, lat=~lat_dec, radius=2)
+```
+
+
+
+```{r}
+
+ldat1=all_dfs %>% 
+  filter(Flight=="Flight8")
+leaflet(data=ldat1[,c(5,4)]) %>% 
+  addTiles() %>% 
+  addCircleMarkers(lng=~lon_dec, lat=~lat_dec, radius=2)
+```
+
+
+At this point you could add the altitude from the DEM [see the "Getting raster values form a Digital Elevation Model" vignette]. Here, for this example, we will use the column called Altitude above the ground (*because we can not include all the DEMs we would need inside the package*).
+
+## Strip-width summary
+
+```{r, results='asis', echo=TRUE, message=FALSE, warning=FALSE}
+ all_dfs=all_dfs%>% 
+    group_by(Flight) %>%
+  filter(!str_detect(photo_no, "IMG")) %>% # remove empty photos
+  rowwise() %>% 
+  mutate("strip_width"=Kulan::get_strip_width(alt_above_ground))
+ our_summary1 <-
+  list("strip width" =
+         list("min"       = ~ round(min(strip_width)),
+              "max"       = ~ round(max(strip_width)),
+              "mean (sd)" = ~ qwraps2::mean_sd(strip_width)))
+
+
+tab_1<-qwraps2::summary_table(dplyr::group_by(all_dfs, Flight),our_summary1)
+tab_1
+
+```
+
+## Remove points where the drone is in take-off or landing
+
+### First plot the data
+
+```{r}
+
+all_dfs %>% 
+  ggplot(aes(time, alt_above_ground, colour=Flight)) +
+  labs(y= "Altitude above ground")+
+  theme(axis.text.x = element_blank())+
+  geom_point()+
+  theme(legend.position = "None")+
+  facet_wrap(~Flight)
+
+```
+
+From the distribution of the altitudes we can see that anything below 200 m is probably take-off or landing phase. 
+
+```{r}
+all_dfs %>% 
+  ggplot(aes(alt_above_ground))+
+  geom_histogram(fill="Red")
+```
+
+However, we might want to look more closely at Flight5 as it seems some of the points during the flight are below 200m.
+
+```{r}
+all_dfs %>% 
+  filter(Flight=="Flight5") %>% 
+  ggplot(aes(time, alt_above_ground, colour=Flight)) +
+  labs(y= "Altitude above sea level")+
+  theme(axis.text.x = element_blank())+
+  geom_point()+
+  geom_hline(yintercept = 200, colour="Red", lty=2) +
+  geom_hline(yintercept = 190, colour="Green", lty=2) +
+  theme(legend.position = "None")
+
+```
+
+So a couple of points in Flight5 during the actual flight were below our threshold of 200m. So let's be conservative and go for 190m instead. You can change this threshold by changing the value in the code below.
+
+```{r}
+all_dfs_reduced=all_dfs %>% 
+  filter(alt_above_ground>190)# The threshold is controlled here - change it by changing the number from 190
+```
+
+Now all the points in consideration are above 190m.Let's re-run the strip-width summary.
+
+```{r, results='asis', echo=FALSE,, message=FALSE, warning=FALSE}
+all_dfs_reduced=all_dfs_reduced%>% 
+    group_by(Flight) %>%
+  filter(!str_detect(photo_no, "IMG")) %>% # remove empty photos
+  rowwise() %>% 
+  mutate("strip_width"=Kulan::get_strip_width(alt_above_ground))
+ our_summary2 <-
+  list("strip width" =
+         list("min"       = ~ round(min(strip_width)),
+              "max"       = ~ round(max(strip_width)),
+              "mean (sd)" = ~ qwraps2::mean_sd(strip_width)))
+
+
+tab_1<-qwraps2::summary_table(dplyr::group_by(all_dfs_reduced, Flight),our_summary2)
+tab_1
+
+```
+## Altitude above ground summary
+
+```{r, message=FALSE, warning=FALSE}
+
+all_dfs_reduced %>% 
+   mutate(time2=as.POSIXct(time,format="%H:%M:%S")) %>% 
+  ggplot(aes(time2,alt_above_ground))+
+  geom_point(colour="darkblue")+
+  geom_line(colour="darkblue", group=1)+
+  labs(x="time", y="Altitude above the ground")+
+  facet_wrap(Flight~., scale="free")
+
+```
+
+
+## Speed summary
+
+Using the gps_speed we can plot the speed of the drone during each flight.
+
+```{r}
+
+all_dfs_reduced%>% 
+  mutate(rowid=row_number()) %>% 
+  mutate(time2=as.POSIXct(time,format="%H:%M:%S")) %>% 
+  #ggplot(aes(time2,gps_speed))+# replace the next line with this to remove the alt_above_ground colour
+  ggplot(aes(time2,gps_speed,colour=alt_above_ground))+
+  geom_point()+
+  geom_line()+
+  labs(x="time", y= "gps speed")+
+  #geom_point(colour="darkblue")+# add these lines too and remove the two above
+  #geom_line(colour="darkblue")+#
+  facet_wrap(~Flight, scales="free")
+```
+
+## Distance between points summary
+
+There are some very large distances moved at the start or the end of a Flight and these need to be filtered out to allow us to plot the distance more clearly. Anything above 250m is therefore removed in the plotting code below.The points are coloured by the gps_speed. 
+
+```{r}
+distance_df=all_dfs_reduced%>% 
+  group_by(Flight) %>% 
+  mutate(new_lat=lag(lat_dec)) %>%
+  mutate(new_lon=lag(lon_dec)) %>%
+  rowwise() %>%
+  mutate(coord_dif=distm(c(lon_dec, lat_dec), c(new_lon, new_lat), fun = distHaversine))
+
+distance_df %>% 
+  group_by(Flight) %>% 
+  mutate(time2=as.POSIXct(time,format="%H:%M:%S")) %>% 
+  filter(coord_dif<250) %>% 
+  ggplot(aes(time2,coord_dif,colour=gps_speed))+
+  geom_point()+
+  geom_line()+
+  scale_colour_gradientn(colours = terrain.colors(10))+
+  labs(x= "time",y="distance (m) between points")+
+  facet_wrap(~Flight, scales="free")
+```
+
+## Banking Angle
+
+
+```{r}
+all_dfs_reduced%>% 
+  mutate(rowid=row_number()) %>% 
+  mutate(time2=as.POSIXct(time,format="%H:%M:%S")) %>% 
+  ggplot(aes(time2,banking_angle))+
+  geom_point(colour="darkblue")+
+  geom_line(colour="darkblue")+
+  labs(x="time", y="Banking angle")+
+  facet_wrap(~Flight, scales="free")
+```
+
+
+## Overlap
+
+The forward overlap is the percentage overlap that two consecutive images have. 
+
+```{r}
+over=distance_df %>% 
+group_by(Flight) %>%
+rowwise() %>% 
+mutate(overlap=Kulan::oforward( dforwar=coord_dif[,1],H=alt_above_ground ))
+
+over %>%
+  mutate(overlap=ifelse(overlap<0,0,overlap)) %>% # this makes any overlap less than 0 == 0
+  ggplot(aes(overlap)) + 
+  geom_histogram(fill="blue")+
+  facet_wrap(~Flight)
+
+```
+
+
+The mean overlap per Flight is
+
+
+```{r}
+over %>%
+  mutate(overlap=ifelse(overlap<0,0,overlap)) %>% # this makes any overlap less than 0 == 0
+  group_by(Flight) %>% 
+  summarise(mnOver=mean(overlap, na.rm=TRUE))
+
+```
+
+```{r}
+over %>%
+  mutate(overlap=ifelse(overlap<0,0,overlap)) %>% # this makes any overlap less than 0 == 0
+  mutate(time=as.POSIXct(time,format="%H:%M:%S")) %>% 
+  ggplot(aes(time,overlap)) + 
+  geom_point(colour="darkblue")+
+  geom_line(colour="darkblue")+
+  facet_wrap(~Flight, scales = "free")
+
+```
+
+
+## Ground surface resolution 
+
+
+```{r}
+GSR_all_dfs=all_dfs_reduced %>% 
+  rowwise() %>% 
+  mutate("GSR"=get_GSD_dist(Altitude = alt_above_ground, Angle = banking_angle))
+
+GSR_all_dfs$GSR 
+
+df=GSR_all_dfs %>% 
+  group_by(Flight) %>% 
+  group_split()
+
+resolution=data.frame("Flight"=c("Flight1","Flight2","Flight3","Flight4","Flight5","Flight6","Flight7","Flight8"), "DGS_far"= c(mean(df[[1]]$GSR$GSD),mean(df[[2]]$GSR$GSD),mean(df[[3]]$GSR$GSD),mean(df[[4]]$GSR$GSD),mean(df[[5]]$GSR$GSD),mean(df[[6]]$GSR$GSD),mean(df[[7]]$GSR$GSD),mean(df[[8]]$GSR$GSD)),"DGS_near"= c(mean(df[[1]]$GSR$GSDc),mean(df[[2]]$GSR$GSDc),mean(df[[3]]$GSR$GSDc),mean(df[[4]]$GSR$GSDc),mean(df[[5]]$GSR$GSDc),mean(df[[6]]$GSR$GSDc),mean(df[[7]]$GSR$GSDc),mean(df[[8]]$GSR$GSDc)))
+
+```
+
+
+## Generate summary ouputs
+
+### Flight summary table 
+
+```{r}
+output_summary_table=all_dfs_reduced %>% 
+  group_by(Flight) %>% 
+  summarise(Date=min(date),  Time_start=min(time), Time_end=max(time), Mean_Altitude=mean(alt_above_ground, na.rm=TRUE), SD_Altitude=sd(alt_above_ground, na.rm=TRUE), Mean_GPS_Speed= mean(gps_speed, na.rm=TRUE),SD_GPS_Speed= sd(gps_speed, na.rm=TRUE), Mean_Banking= mean(banking_angle, na.rm=TRUE),SD_Banking= sd(banking_angle, na.rm=TRUE), Mean_Strip_Width=mean(strip_width, na.rm=TRUE), SD_Strip_width=sd(strip_width, na.rm=TRUE))
+
+over_sum=over %>% 
+  group_by(Flight) %>% 
+  summarise(Mean_Overlap=mean(overlap, na.rm=TRUE), SD_Overlap=sd(overlap, na.rm=TRUE))
+
+no_photos=all_dfs_reduced %>% 
+  group_by(Flight) %>% 
+  tally()
+
+output_summary_table=output_summary_table %>% inner_join(over_sum)
+
+output_summary_table=output_summary_table %>% inner_join(resolution)
+
+output_summary_table =output_summary_table %>% inner_join(no_photos)
+output_summary_table %>% 
+  rename(.,"no_of_photos"="n")
+# You can write the table to .csv using this code below
+#write.csv(output_summary_table, "Summary_per_flight.csv")
+```
+
+```{r}
+kableExtra::kable(output_summary_table) %>% 
+  kableExtra::kable_styling()
+```
+
+
+### Export to excel
+
+```{r}
+
+Export_2_excel=over %>% 
+  mutate(strip_width_1_side=strip_width/2)
+
+Export_2_excel$DGS_near=GSR_all_dfs$GSR$GSDw
+Export_2_excel$DGS_far=GSR_all_dfs$GSR$GSDh
+
+
+Export_2_excel=Export_2_excel %>% 
+  select(!c("new_lat","new_lon"))# removes these columns as they are only used for calculating over values
+
+# You can write this table to excel by running this line (delete the "comment" '#' symbol)
+#write.csv(Export_2_excel, "Flight_data.csv")
+
+
+```

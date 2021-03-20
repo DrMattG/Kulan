@@ -1,0 +1,4 @@
+name: Flight summary
+description: >
+   This is an RMarkdown template for generating drone flight summaries for the Kulan project
+create_dir: TRUE
