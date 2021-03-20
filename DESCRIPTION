@@ -27,7 +27,9 @@ Imports: VGAM,
           tidyverse,
           ggpubr,
           geosphere,
-          here
+          here,
+          data.table,
+          leaflet
 Depends: 
     R (>= 2.10)
 Suggests: 
