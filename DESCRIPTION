@@ -9,7 +9,13 @@ Authors@R:
            comment = c(ORCID = "0000-0001-8426-6495")),
            person(given="Petra",
            family="Kaczensky",
-           role= c("aut")))
+           role= c("aut")),
+           person(given="Richard",
+           family="Hedger",
+           role=c("ctb")),
+           person(given="Charles",
+           family="Gray",
+           role=c("ctb")))
 Description: This package contains functions that will help in the analysis of data from drone surveys primarily for Kulan.  
 License: MIT + file LICENSE
 Encoding: UTF-8
