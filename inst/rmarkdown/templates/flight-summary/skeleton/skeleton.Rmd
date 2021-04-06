@@ -47,9 +47,8 @@ To create a "report" once you are happy with the text and code in the RMarkdown 
 
 ## Gather all the Flights in to a single dataset
 
-
 ```{r make a large dataset, echo=TRUE, message=FALSE, warning=FALSE}
-
+library(here)
 #here::here()
 path=paste0(here::here(),"/", "data/tables")
 #list.files(path)
@@ -61,28 +60,10 @@ all_dfs=all_dfs %>%
 
 ```
 
-## or load a already compiled dataset
-
-```{r}
-df_e <- read_delim(paste0(here::here(),"/in_development/df_e.csv"),";", escape_double = FALSE, trim_ws = TRUE) # need to change the directory here to the correct path on your computer
-
-#df_e<_read_delim("path", "delim", escape_double = FALSE, trim_ws = TRUE)
-
-all_dfs=df_e %>%
-  select(!X1)# Drop the first column that has been imported from EXCEL - check that this is also the case for you
-
-all_dfs=all_dfs %>% 
-  mutate(
-    time = format(time, "%H:%M:%S")
-    ) # fix time format
-
-```
-
-
 ## Draw the flight paths for all flights
 
 ```{r}
-
+library(leaflet)
 pal <- colorFactor(
   palette = 'Dark2',
   domain = all_dfs$Flight
@@ -98,7 +79,7 @@ leaflet(data=all_dfs[,c(5,4, 18)]) %>%
 ## Draw the flight paths for each flight
 
 ```{r}
-
+library(leaflet)
 ldat1=all_dfs %>% 
   filter(Flight=="Flight1")
 leaflet(data=ldat1[,c(5,4)]) %>% 
@@ -107,7 +88,7 @@ leaflet(data=ldat1[,c(5,4)]) %>%
 ```
 
 ```{r}
-
+library(leaflet)
 ldat1=all_dfs %>% 
   filter(Flight=="Flight2")
 leaflet(data=ldat1[,c(5,4)]) %>% 
@@ -117,7 +98,7 @@ leaflet(data=ldat1[,c(5,4)]) %>%
 
 
 ```{r}
-
+library(leaflet)
 ldat1=all_dfs %>% 
   filter(Flight=="Flight3")
 leaflet(data=ldat1[,c(5,4)]) %>% 
@@ -128,7 +109,7 @@ leaflet(data=ldat1[,c(5,4)]) %>%
 
 
 ```{r}
-
+library(leaflet)
 ldat1=all_dfs %>% 
   filter(Flight=="Flight4")
 leaflet(data=ldat1[,c(5,4)]) %>% 
@@ -138,8 +119,7 @@ leaflet(data=ldat1[,c(5,4)]) %>%
 
 
 ```{r}
-
-
+library(leaflet)
 ldat1=all_dfs %>% 
   filter(Flight=="Flight5")
 leaflet(data=ldat1[,c(5,4)]) %>% 
@@ -150,8 +130,7 @@ leaflet(data=ldat1[,c(5,4)]) %>%
 
 
 ```{r}
-
-
+library(leaflet)
 ldat1=all_dfs %>% 
   filter(Flight=="Flight6")
 leaflet(data=ldat1[,c(5,4)]) %>% 
@@ -161,7 +140,7 @@ leaflet(data=ldat1[,c(5,4)]) %>%
 
 
 ```{r}
-
+library(leaflet)
 ldat1=all_dfs %>% 
   filter(Flight=="Flight7")
 leaflet(data=ldat1[,c(5,4)]) %>% 
@@ -172,7 +151,7 @@ leaflet(data=ldat1[,c(5,4)]) %>%
 
 
 ```{r}
-
+library(leaflet)
 ldat1=all_dfs %>% 
   filter(Flight=="Flight8")
 leaflet(data=ldat1[,c(5,4)]) %>% 
@@ -190,12 +169,13 @@ At this point you could add the altitude from the DEM [see the "Getting raster v
     group_by(Flight) %>%
   filter(!str_detect(photo_no, "IMG")) %>% # remove empty photos
   rowwise() %>% 
-  mutate("strip_width"=Kulan::get_strip_width(alt_above_ground))
+  mutate("strip_width"=get_strip_width(alt=alt_above_ground,banking_angle = banking_angle)) %>% 
+  drop_na(strip_width)
  our_summary1 <-
   list("strip width" =
          list("min"       = ~ round(min(strip_width)),
               "max"       = ~ round(max(strip_width)),
-              "mean (sd)" = ~ qwraps2::mean_sd(strip_width)))
+              "mean (sd)" = ~qwraps2::mean_sd(strip_width)))
 
 
 tab_1<-qwraps2::summary_table(dplyr::group_by(all_dfs, Flight),our_summary1)
@@ -208,12 +188,11 @@ tab_1
 ### First plot the data
 
 ```{r}
-
 all_dfs %>% 
-  ggplot(aes(time, alt_above_ground, colour=Flight)) +
-  labs(y= "Altitude above ground")+
-  theme(axis.text.x = element_blank())+
+  mutate(time2=as.POSIXct(time,format="%H:%M:%S")) %>% 
+  ggplot(aes(time2, alt_above_ground, colour=Flight))+ 
   geom_point()+
+  labs(x="time",y= "Altitude above ground")+
   theme(legend.position = "None")+
   facet_wrap(~Flight)
 
@@ -256,7 +235,7 @@ all_dfs_reduced=all_dfs_reduced%>%
     group_by(Flight) %>%
   filter(!str_detect(photo_no, "IMG")) %>% # remove empty photos
   rowwise() %>% 
-  mutate("strip_width"=Kulan::get_strip_width(alt_above_ground))
+  mutate("strip_width"=Kulan::get_strip_width(alt=alt_above_ground, banking_angle = banking_angle))
  our_summary2 <-
   list("strip width" =
          list("min"       = ~ round(min(strip_width)),
@@ -270,13 +249,12 @@ tab_1
 ```
 ## Altitude above ground summary
 
-```{r, message=FALSE, warning=FALSE}
-
+```{r}
 all_dfs_reduced %>% 
    mutate(time2=as.POSIXct(time,format="%H:%M:%S")) %>% 
   ggplot(aes(time2,alt_above_ground))+
   geom_point(colour="darkblue")+
-  geom_line(colour="darkblue", group=1)+
+  geom_line(colour="darkblue")+
   labs(x="time", y="Altitude above the ground")+
   facet_wrap(Flight~., scale="free")
 
@@ -296,7 +274,7 @@ all_dfs_reduced%>%
   ggplot(aes(time2,gps_speed,colour=alt_above_ground))+
   geom_point()+
   geom_line()+
-  labs(x="time", y= "gps speed")+
+  labs(x="time", y="gps speed")+
   #geom_point(colour="darkblue")+# add these lines too and remove the two above
   #geom_line(colour="darkblue")+#
   facet_wrap(~Flight, scales="free")
@@ -316,13 +294,13 @@ distance_df=all_dfs_reduced%>%
 
 distance_df %>% 
   group_by(Flight) %>% 
-  mutate(time2=as.POSIXct(time,format="%H:%M:%S")) %>% 
+   mutate(time2=as.POSIXct(time,format="%H:%M:%S")) %>% 
   filter(coord_dif<250) %>% 
   ggplot(aes(time2,coord_dif,colour=gps_speed))+
   geom_point()+
   geom_line()+
   scale_colour_gradientn(colours = terrain.colors(10))+
-  labs(x= "time",y="distance (m) between points")+
+  labs(x="time",y="distance (m) between points")+
   facet_wrap(~Flight, scales="free")
 ```
 
@@ -340,7 +318,18 @@ all_dfs_reduced%>%
   facet_wrap(~Flight, scales="free")
 ```
 
+## Photograph area
 
+```{r}
+all_dfs_reduced %>% 
+  rowwise() %>% 
+  mutate("photo_area"=Kulan::get_photo_area(altitude = alt_above_ground,banking_angle = banking_angle)) %>% 
+  dplyr::select(photo_area) %>% 
+  ggplot(aes(photo_area))+
+  labs(x="photograph area m2")+
+  geom_histogram(fill="red")+
+  theme_classic()
+```
 ## Overlap
 
 The forward overlap is the percentage overlap that two consecutive images have. 
@@ -358,7 +347,6 @@ over %>%
   facet_wrap(~Flight)
 
 ```
-
 
 The mean overlap per Flight is
 
@@ -381,23 +369,16 @@ over %>%
   facet_wrap(~Flight, scales = "free")
 
 ```
-
-
-## Ground surface resolution 
+## Ground surface resolution
 
 
 ```{r}
 GSR_all_dfs=all_dfs_reduced %>% 
-  rowwise() %>% 
-  mutate("GSR"=get_GSD_dist(Altitude = alt_above_ground, Angle = banking_angle))
-
-GSR_all_dfs$GSR 
-
-df=GSR_all_dfs %>% 
+  rowwise() %>%mutate("GSD_near"=Kulan::GSD(altitude = alt_above_ground
+                                 )[1])%>%  mutate("GSD_mid"=Kulan::GSD(altitude = alt_above_ground)[2]) %>% mutate("GSD_far"=Kulan::GSD(altitude = alt_above_ground)[3])
+GSR_all_dfs %>% 
   group_by(Flight) %>% 
-  group_split()
-
-resolution=data.frame("Flight"=c("Flight1","Flight2","Flight3","Flight4","Flight5","Flight6","Flight7","Flight8"), "DGS_far"= c(mean(df[[1]]$GSR$GSD),mean(df[[2]]$GSR$GSD),mean(df[[3]]$GSR$GSD),mean(df[[4]]$GSR$GSD),mean(df[[5]]$GSR$GSD),mean(df[[6]]$GSR$GSD),mean(df[[7]]$GSR$GSD),mean(df[[8]]$GSR$GSD)),"DGS_near"= c(mean(df[[1]]$GSR$GSDc),mean(df[[2]]$GSR$GSDc),mean(df[[3]]$GSR$GSDc),mean(df[[4]]$GSR$GSDc),mean(df[[5]]$GSR$GSDc),mean(df[[6]]$GSR$GSDc),mean(df[[7]]$GSR$GSDc),mean(df[[8]]$GSR$GSDc)))
+  summarise(m_per_pixel_near=mean(unlist(GSD_near), na.rm=TRUE), sd_m_per_pixel_near=sd(unlist(GSD_near), na.rm=TRUE),m_per_pixel_far=mean(unlist(GSD_far), na.rm=TRUE), sd_m_per_pixel_far=sd(unlist(GSD_far), na.rm=TRUE))
 
 ```
 
@@ -421,7 +402,7 @@ no_photos=all_dfs_reduced %>%
 
 output_summary_table=output_summary_table %>% inner_join(over_sum)
 
-output_summary_table=output_summary_table %>% inner_join(resolution)
+output_summary_table=output_summary_table %>% inner_join(GSR_all_dfs)
 
 output_summary_table =output_summary_table %>% inner_join(no_photos)
 output_summary_table %>% 
@@ -441,17 +422,16 @@ kableExtra::kable(output_summary_table) %>%
 ```{r}
 
 Export_2_excel=over %>% 
-  mutate(strip_width_1_side=strip_width/2)
+  mutate(strip_width_1_side=strip_width)
 
-Export_2_excel$DGS_near=GSR_all_dfs$GSR$GSDw
-Export_2_excel$DGS_far=GSR_all_dfs$GSR$GSDh
-
+Export_2_excel$GSD=GSR_all_dfs$GSR
 
 Export_2_excel=Export_2_excel %>% 
-  select(!c("new_lat","new_lon"))# removes these columns as they are only used for calculating over values
+  dplyr::select(!c("v18","new_lat","new_lon",))# removes these coloumns as they are only used for calculating over values
 
 # You can write this table to excel by running this line (delete the "comment" '#' symbol)
 #write.csv(Export_2_excel, "Flight_data.csv")
 
 
 ```
+
