@@ -4,24 +4,24 @@
 \alias{GSD}
 \title{Ground sampling distance (Spatial Resolution)}
 \usage{
-GSD(f = 35, H = Altitude, pixel = 4.5)
+GSD(altitude, angle_of_camera = 25, pixel = 4.5, focallen = 35)
 }
 \arguments{
-\item{H}{the height of the drone above the ground}
+\item{altitude}{the height of the drone above the ground}
+
+\item{angle_of_camera}{the angle of the camera is set}
 
 \item{pixel}{pixel size in micrometers}
 
-\item{Focal_Length}{Focal length}
+\item{focallen}{Focal length}
 }
 \value{
-Ground surface distance
+Ground surface distance m per pixel
 }
 \description{
 Calculates the ground sampling distance (spatial resolution). This version of the function ignores angular distortion
 }
 \details{
-This version of the function assumes no angular distortion. The spatial resolution is calculated using the scale (focal length of the camera / Flying height above ground level). This equates to the sensor pixel size/ Ground pixel size. To calculate the ground sample distance we need to know the flying height, the camera sensor size and the lens focal length.
-
 Camera: SONY DCS-RX1RM2
 
 Sensor: 35.9 x 24.0 mm

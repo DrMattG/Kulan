@@ -103,6 +103,9 @@
     <li>
       <a href="../articles/working-with-the-kulan-package.html">Working with the Kulan package</a>
     </li>
+    <li>
+      <a href="../articles/Working_out_the_trapezoid.html">Working out the trapezoid</a>
+    </li>
   </ul>
 </li>
       </ul>
@@ -130,32 +133,35 @@
     <p>Calculates the ground sampling distance (spatial resolution). This version of the function ignores angular distortion</p>
     </div>
 
-    <pre class="usage"><span class='fu'>GSD</span><span class='op'>(</span>f <span class='op'>=</span> <span class='fl'>35</span>, H <span class='op'>=</span> <span class='va'>Altitude</span>, pixel <span class='op'>=</span> <span class='fl'>4.5</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>GSD</span><span class='op'>(</span><span class='va'>altitude</span>, angle_of_camera <span class='op'>=</span> <span class='fl'>25</span>, pixel <span class='op'>=</span> <span class='fl'>4.5</span>, focallen <span class='op'>=</span> <span class='fl'>35</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>H</th>
+      <th>altitude</th>
       <td><p>the height of the drone above the ground</p></td>
+    </tr>
+    <tr>
+      <th>angle_of_camera</th>
+      <td><p>the angle of the camera is set</p></td>
     </tr>
     <tr>
       <th>pixel</th>
       <td><p>pixel size in micrometers</p></td>
     </tr>
     <tr>
-      <th>Focal_Length</th>
+      <th>focallen</th>
       <td><p>Focal length</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Ground surface distance</p>
+    <p>Ground surface distance m per pixel</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>This version of the function assumes no angular distortion. The spatial resolution is calculated using the scale (focal length of the camera / Flying height above ground level). This equates to the sensor pixel size/ Ground pixel size. To calculate the ground sample distance we need to know the flying height, the camera sensor size and the lens focal length.</p>
-<p>Camera: SONY DCS-RX1RM2</p>
+    <p>Camera: SONY DCS-RX1RM2</p>
 <p>Sensor: 35.9 x 24.0 mm</p>
 <p>Viewing angle: (CORRESPONDING 35 MM FORMAT) 63 degrees (35mm))</p>
 <p>Focal length: 35mm</p>

@@ -5,23 +5,30 @@
 \title{Calculate the strip width (two cameras on the drone)}
 \usage{
 get_strip_width(
-  altitude,
-  angle1 = 25,
-  angle2 = 25.7,
-  distance_between_cameras = 0.03
+  xsensor = 35.9,
+  ysensor = 24,
+  focallen = 35,
+  ygim = 0,
+  xgim = 25,
+  alt,
+  banking_angle
 )
 }
 \arguments{
-\item{altitude}{the height of the drone above the ground}
+\item{xsensor}{horizontal sensor in mm}
 
-\item{angle1}{the angle of camera1}
+\item{ysensor}{vertical sensor in mm}
 
-\item{angle2}{the angle of camera2}
+\item{focallen}{focal length of the camera}
 
-\item{distance_between_cameras}{added value for the distance between cameras}
+\item{ygim}{angle of the camera on the y axis}
+
+\item{xgim}{angle of the camera on the x axis}
+
+\item{alt}{the altitude of the drone}
 }
 \value{
-distance along the ground
+value of the horizontal strip-width (one side)
 }
 \description{
 Calculate the strip width (two cameras on the drone)

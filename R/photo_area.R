@@ -1,43 +1,28 @@
 #' Calculate the area of a drone image
-#' @param alt = Drone altitude
-#' @param AOV = Angle of view
+#' @param altitude = Drone altitude
+#' @param angle_of_camera The set angle of the camera
+#' @return The area of the photograph in m2
 #' @export
-
-# assume perpendicular to the ground
-photo_area<-function(alt, AOV){
-  gr_in_image<-(tan(AOV/2)*alt)*2
-  return(gr_in_image)
+get_photo_area=function(altitude, angle_of_camera=25, banking_angle){
+  h=altitude
+  # angle of camera
+  # 25 degrees
+  theta <- Kulan::deg_to_rad(angle_of_camera)
+  # horizontal field of view
+  phi <- Kulan::deg_to_rad(Kulan::get_HFOV()+banking_angle)
+  # vertical field of view
+  omega <-Kulan::deg_to_rad(Kulan::get_VFOV())
+  # pixels
+  pixels <- c(7952, 5304)
+  Dc= h*tan(theta-phi/2)
+  Df= h*tan(theta+phi/2)
+  Dm= h*tan(theta+phi*0.5/2)
+  delta <- Df - Dc
+  Wc=2*(Dc^2+h^2)^0.5*tan(omega/2)
+  Wm=2*((Dc+Df/2)^2+h^2)^0.5*tan(omega/2)
+  Wf=2*(Df^2+h^2)^0.5*tan(omega/2)
+  area <-
+    #A=(a+b/2)*h
+    ((Wc+Wf)/2)*(Df-Dc)
+  return(area)
 }
-
-
-#' Calculate the length of the sides of image
-#' @param alt = Drone altitude
-#' @export
-
-# Assume drone looking directly down
-# Specific to this drone
-# 15% overlap?
-#Camera: SONY DCS-RX1RM2
-#Sensor: 35.9 x 24.0 mm
-#VIEWING ANGLE LENS (CORRESPONDING 35 MM FORMAT) 63 degrees (35mm))
-#Focal length: 35mm
-#Flight height: 200-250m
-#Image width in pixel: 7952
-#Image height in pixel: 5304
-
-
-Image_sides=function(Altitude=Altitude){
-  b=Altitude #height
-  C=63/2*pi/180  #angle
-  A=90*pi/180  #right angle
-  B=A-C
-  a=b*(sin(A)/sin(B))
-  c=b*(sin(C)/sin(B))
-  side1=a
-  side2=c*2
-  df=data.frame(side1,side2)
-  return(df)
-
-}
-
-

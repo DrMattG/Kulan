@@ -143,12 +143,13 @@ At this point you could add the altitude from the DEM [see the "Getting raster v
     group_by(Flight) %>%
   filter(!str_detect(photo_no, "IMG")) %>% # remove empty photos
   rowwise() %>% 
-  mutate("strip_width"=Kulan::get_strip_width(alt_above_ground))
+  mutate("strip_width"=get_strip_width(alt=alt_above_ground,banking_angle = banking_angle)) %>% 
+  drop_na(strip_width)
  our_summary1 <-
   list("strip width" =
          list("min"       = ~ round(min(strip_width)),
               "max"       = ~ round(max(strip_width)),
-              "mean (sd)" = ~ qwraps2::mean_sd(strip_width)))
+              "mean (sd)" = ~qwraps2::mean_sd(strip_width)))
 
 
 tab_1<-qwraps2::summary_table(dplyr::group_by(all_dfs, Flight),our_summary1)
@@ -208,7 +209,7 @@ all_dfs_reduced=all_dfs_reduced%>%
     group_by(Flight) %>%
   filter(!str_detect(photo_no, "IMG")) %>% # remove empty photos
   rowwise() %>% 
-  mutate("strip_width"=Kulan::get_strip_width(alt_above_ground))
+  mutate("strip_width"=Kulan::get_strip_width(alt=alt_above_ground, banking_angle = banking_angle))
  our_summary2 <-
   list("strip width" =
          list("min"       = ~ round(min(strip_width)),
@@ -291,11 +292,18 @@ all_dfs_reduced%>%
   facet_wrap(~Flight, scales="free")
 ```
 
+## Photograph area
 
-
-
-
-
+```{r}
+all_dfs_reduced %>% 
+  rowwise() %>% 
+  mutate("photo_area"=Kulan::get_photo_area(altitude = alt_above_ground,banking_angle = banking_angle)) %>% 
+  dplyr::select(photo_area) %>% 
+  ggplot(aes(photo_area))+
+  labs(x="photograph area m2")+
+  geom_histogram(fill="red")+
+  theme_classic()
+```
 ## Overlap
 
 The forward overlap is the percentage overlap that two consecutive images have. 
@@ -313,9 +321,6 @@ over %>%
   facet_wrap(~Flight)
 
 ```
-
-
-
 
 The mean overlap per Flight is
 
@@ -338,40 +343,19 @@ over %>%
   facet_wrap(~Flight, scales = "free")
 
 ```
+## Ground surface resolution
 
-
-## Ground surface resolution 1 
-
-*Assuming no angle of distortion on the camera*
 
 ```{r}
 GSR_all_dfs=all_dfs_reduced %>% 
-  rowwise() %>% 
-  mutate("GSR"=GSD(H=alt_above_ground))
-
+  rowwise() %>%mutate("GSD_near"=Kulan::GSD(altitude = alt_above_ground
+                                 )[1])%>%  mutate("GSD_mid"=Kulan::GSD(altitude = alt_above_ground)[2]) %>% mutate("GSD_far"=Kulan::GSD(altitude = alt_above_ground)[3])
 GSR_all_dfs %>% 
   group_by(Flight) %>% 
-  summarise(mean_cm_per_pix=mean(GSR*100, na.rm=TRUE), sd_cm_per_pix=sd(GSR*100, na.rm=TRUE))
+  summarise(m_per_pixel_near=mean(unlist(GSD_near), na.rm=TRUE), sd_m_per_pixel_near=sd(unlist(GSD_near), na.rm=TRUE),m_per_pixel_far=mean(unlist(GSD_far), na.rm=TRUE), sd_m_per_pixel_far=sd(unlist(GSD_far), na.rm=TRUE))
 
 ```
 
-
-```{r, echo=TRUE}
-resolution1=GSR_all_dfs %>% 
-  mutate(Fp=Ground_footprint(GSR)) %>% 
-   group_by(Flight) %>% 
-  summarise(mean_GF=mean(Fp, na.rm=TRUE), sd_GF=sd(Fp, na.rm=TRUE))
-resolution1
-
-  
-```
-
-
-## Ground surface resolution 2 
-
-*Assume angle of distortion on the camera*
-
-TBC
 
 ## Generate summary ouputs
 
@@ -392,7 +376,7 @@ no_photos=all_dfs_reduced %>%
 
 output_summary_table=output_summary_table %>% inner_join(over_sum)
 
-output_summary_table=output_summary_table %>% inner_join(resolution1)
+output_summary_table=output_summary_table %>% inner_join(GSR_all_dfs)
 
 output_summary_table =output_summary_table %>% inner_join(no_photos)
 output_summary_table %>% 
@@ -412,12 +396,12 @@ kableExtra::kable(output_summary_table) %>%
 ```{r}
 
 Export_2_excel=over %>% 
-  mutate(strip_width_1_side=strip_width/2)
+  mutate(strip_width_1_side=strip_width)
 
 Export_2_excel$GSD=GSR_all_dfs$GSR
 
 Export_2_excel=Export_2_excel %>% 
-  select(!c("v18","new_lat","new_lon",))# removes these coloumns as they are only used for calculating over values
+  dplyr::select(!c("v18","new_lat","new_lon",))# removes these coloumns as they are only used for calculating over values
 
 # You can write this table to excel by running this line (delete the "comment" '#' symbol)
 #write.csv(Export_2_excel, "Flight_data.csv")

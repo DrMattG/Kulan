@@ -51,24 +51,33 @@ To calculate the width of a drone image we need to know the height of the drone 
 ```{r ground in image}
 df<-df %>%
   rowwise() %>%
-  mutate("strip_width"=Kulan::get_strip_width(`alt_above_ground`)) 
+  mutate("strip_width"=Kulan::get_strip_width(alt=`alt_above_ground`, banking_angle = banking_angle)) 
 
-mean(df$strip_width)
+mean(df$strip_width, na.rm=TRUE)
 ```
 
 **Get the ground surface distance**
 
-To calculate the ground surface distance (1 pixel) there are two functions, one that assumes no distortion due to the angle of the camera and one that allows for distortion (this later function is still in development) . 
+To calculate the ground surface distance (m per pixel) there is one function. 
 
 ```{r}
 
 df<-df %>%
   rowwise() %>%
-  mutate("get_GSD"=Kulan::get_GSD(Altitude = `alt_above_ground`)) 
+  mutate("GSD_near"=Kulan::GSD(altitude = alt_above_ground
+                                 )[1])%>%  mutate("GSD_mid"=Kulan::GSD(altitude = alt_above_ground)[2]) %>% mutate("GSD_far"=Kulan::GSD(altitude = alt_above_ground)[3])
 
-mean(df$get_GSD, na.rm=TRUE) # this includes the drones take off and landing phases so needs to be recalculated 
+mean(unlist(df$GSD_near), na.rm = TRUE)
+mean(unlist(df$GSD_far), na.rm = TRUE)
 ```
 
+***Plot the dimensions of each photograph***
+
+We can plot out the dimensions of each photograph by using the plot_trapezoid() function. This function plots out the horizontal and vertical dimensions of the photograph and projects this to the ground. 
+```{r}
+# Choose one photograph
+plot_trapezoid(df$alt_above_ground[19], banking_angle = df$banking_angle[19])
+```
 
 ### Abundance estimators
 

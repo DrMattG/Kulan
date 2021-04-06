@@ -103,6 +103,9 @@
     <li>
       <a href="../articles/working-with-the-kulan-package.html">Working with the Kulan package</a>
     </li>
+    <li>
+      <a href="../articles/Working_out_the_trapezoid.html">Working out the trapezoid</a>
+    </li>
   </ul>
 </li>
       </ul>
@@ -131,36 +134,47 @@
     </div>
 
     <pre class="usage"><span class='fu'>get_strip_width</span><span class='op'>(</span>
-  <span class='va'>altitude</span>,
-  angle1 <span class='op'>=</span> <span class='fl'>25</span>,
-  angle2 <span class='op'>=</span> <span class='fl'>25.7</span>,
-  distance_between_cameras <span class='op'>=</span> <span class='fl'>0.03</span>
+  xsensor <span class='op'>=</span> <span class='fl'>35.9</span>,
+  ysensor <span class='op'>=</span> <span class='fl'>24</span>,
+  focallen <span class='op'>=</span> <span class='fl'>35</span>,
+  ygim <span class='op'>=</span> <span class='fl'>0</span>,
+  xgim <span class='op'>=</span> <span class='fl'>25</span>,
+  <span class='va'>alt</span>,
+  <span class='va'>banking_angle</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>altitude</th>
-      <td><p>the height of the drone above the ground</p></td>
+      <th>xsensor</th>
+      <td><p>horizontal sensor in mm</p></td>
     </tr>
     <tr>
-      <th>angle1</th>
-      <td><p>the angle of camera1</p></td>
+      <th>ysensor</th>
+      <td><p>vertical sensor in mm</p></td>
     </tr>
     <tr>
-      <th>angle2</th>
-      <td><p>the angle of camera2</p></td>
+      <th>focallen</th>
+      <td><p>focal length of the camera</p></td>
     </tr>
     <tr>
-      <th>distance_between_cameras</th>
-      <td><p>added value for the distance between cameras</p></td>
+      <th>ygim</th>
+      <td><p>angle of the camera on the y axis</p></td>
+    </tr>
+    <tr>
+      <th>xgim</th>
+      <td><p>angle of the camera on the x axis</p></td>
+    </tr>
+    <tr>
+      <th>alt</th>
+      <td><p>the altitude of the drone</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>distance along the ground</p>
+    <p>value of the horizontal strip-width (one side)</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
