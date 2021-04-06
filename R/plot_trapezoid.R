@@ -21,8 +21,8 @@ Dm= h*tan(theta+phi*0.5/2)
 Rc=sqrt(h^2+Dc^2)
 Rm=sqrt(h^2+Dm^2)
 Rf=sqrt(h^2+Df^2)
-dt.triangle <- data.table(group = c(1,1,1), polygon.x = c(0,Dc,0), polygon.y = c(h,0,0))
-dt.triangle2 <- data.table(group = c(1,1,1), polygon.x = c(0,Df,0), polygon.y = c(h,0,0))
+dt.triangle <-data.table::data.table(group = c(1,1,1), polygon.x = c(0,Dc,0), polygon.y = c(h,0,0))
+dt.triangle2 <-data.table::data.table(group = c(1,1,1), polygon.x = c(0,Df,0), polygon.y = c(h,0,0))
 p <- ggplot()
 p <- p + geom_polygon(
   data = dt.triangle
