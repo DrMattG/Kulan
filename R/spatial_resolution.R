@@ -22,7 +22,7 @@
 #'
 #' Image height in pixels: 5304
 #'
-#' @return Ground surface distance m per pixel
+#' @return Ground surface distance cm per pixel
 #' @export
 
 GSD=function(altitude, angle_of_camera=25, pixel=4.5, focallen=35){
@@ -49,12 +49,12 @@ GSD=function(altitude, angle_of_camera=25, pixel=4.5, focallen=35){
 
   #GSDH = FLIGHT HEIGHT*Sensor Height/Focal length*Image height
   #GSDW = FLIGHT HEIGHT*Sensor Width/Focal length*Image height
-  near=(Rc)*(pixel)/focallen
-  mid=(Rm)*(pixel)/focallen
-  far=(Rf)*(pixel)/focallen
-  list("near"=round(near,3),
-       "mid"=round(mid,3),
-       "far"=round(far,3))
+  near=(Rc)*(pixel)/focallen*100
+  mid=(Rm)*(pixel)/focallen*100
+  far=(Rf)*(pixel)/focallen*100
+  list("near"=round(near,2),
+       "mid"=round(mid,2),
+       "far"=round(far,2))
 }
 
 

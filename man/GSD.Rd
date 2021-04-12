@@ -16,7 +16,7 @@ GSD(altitude, angle_of_camera = 25, pixel = 4.5, focallen = 35)
 \item{focallen}{Focal length}
 }
 \value{
-Ground surface distance m per pixel
+Ground surface distance cm per pixel
 }
 \description{
 Calculates the ground sampling distance (spatial resolution). This version of the function ignores angular distortion

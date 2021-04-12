@@ -125,9 +125,9 @@
                                  <span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">%&gt;%</span>  <span class="fu">mutate</span><span class="op">(</span><span class="st">"GSD_mid"</span><span class="op">=</span><span class="fu">Kulan</span><span class="fu">::</span><span class="fu"><a href="../reference/GSD.html">GSD</a></span><span class="op">(</span>altitude <span class="op">=</span> <span class="va">alt_above_ground</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">mutate</span><span class="op">(</span><span class="st">"GSD_far"</span><span class="op">=</span><span class="fu">Kulan</span><span class="fu">::</span><span class="fu"><a href="../reference/GSD.html">GSD</a></span><span class="op">(</span>altitude <span class="op">=</span> <span class="va">alt_above_ground</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">GSD_near</span><span class="op">)</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="co">#&gt; [1] 0.02875532</span>
+<span class="co">#&gt; [1] 2.873287</span>
 <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">GSD_far</span><span class="op">)</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="co">#&gt; [1] 0.04678584</span></code></pre></div>
+<span class="co">#&gt; [1] 4.679589</span></code></pre></div>
 <p><strong><em>Plot the dimensions of each photograph</em></strong></p>
 <p>We can plot out the dimensions of each photograph by using the plot_trapezoid() function. This function plots out the horizontal and vertical dimensions of the photograph and projects this to the ground.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -212,8 +212,8 @@
 <hr>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/jolly2.html">jolly2</a></span><span class="op">(</span>species_count <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">sp_count</span>, Transect_area <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">Trans_area</span>,Z<span class="op">=</span><span class="fl">164</span><span class="op">*</span><span class="fl">5</span><span class="op">)</span>
-<span class="co">#&gt;   Estimate lower_CI upper_CI       SE mean.y     SD.y Coef.of.Var.y</span>
-<span class="co">#&gt; 1 2888.589 2551.968 3225.209 202.7356  13.83 13.17332      0.952518</span></code></pre></div>
+<span class="co">#&gt;   Estimate lower_CI upper_CI       SE mean.y    SD.y Coef.of.Var.y</span>
+<span class="co">#&gt; 1  2597.35 2274.488 2920.212 194.4491  12.67 12.9981      1.025896</span></code></pre></div>
 <p><strong>Run the n-mixture model</strong></p>
 <p>Finally, to run the n-mixture model you can use the run_kulan_model() function. See more details about this function using help().</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
