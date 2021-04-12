@@ -55,6 +55,17 @@ p2=ggplot(positions[c(1,2,4,3),], aes(x = x, y = y)) +
   theme_classic()+
   theme(legend.position = "None")
 
+
+# Add table of values
+print(data.frame("Dc"=Dc,
+           "Dm"=Dm,
+           "Df"=Df,
+           "Rc"=Rc,
+           "Rm"=Rm,
+           "Rf"=Rf,
+           "Wc"=Wc,
+           "Wm"=Wm,
+           "Wf"=Wf))
 library(patchwork)
 p1+p2
 }

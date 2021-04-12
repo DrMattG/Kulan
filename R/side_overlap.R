@@ -1,21 +1,28 @@
-#' Calculate side overlap
-#' @param H. = Drone altitude
-#' @param dside. = distance between points where image was taken
-#' @param f.= focal length (default = 35mm)
-#' @param w.= sensor width (default = 24mm)
-#' @references \url{https://doi.org/10.3390/rs11101252}
+#' Calculate the side overlap
+#' @param altitude = Drone altitude
+#' @param angle_of_camera1 The set angle of the camera on the left
+#' #' @param angle_of_camera2 The set angle of the camera on the right
+#' @param banking_angle The banking angle of the drone
+#' @return side overlap in meters
+#' @examples
+#' side_overlap(altitude = 200, banking_angle = 0)
 #' @export
+side_overlap=function(altitude, angle_of_camera1=25, angle_of_camera2=25.7, banking_angle){
+  h=altitude
+  theta <- Kulan::deg_to_rad(angle_of_camera1+banking_angle)
+  # horizontal field of view
+  phi <- Kulan::deg_to_rad(Kulan::get_HFOV()+banking_angle)
+  Dc= h*tan(theta-phi/2)
 
+  theta1 <- Kulan::deg_to_rad(angle_of_camera2+banking_angle)
+  # horizontal field of view
+  phi1 <- Kulan::deg_to_rad(Kulan::get_HFOV()+banking_angle)
+  Dc1= h*tan(theta-phi/2)
 
-#Camera: SONY DCS-RX1RM2
-#Sensor: 35.9 x 24.0 mm
-#VIEWING ANGLE LENS (CORRESPONDING 35 MM FORMAT) 63 degrees (35mm))
-#Focal length: 35mm
-#Flight height: 200-250m
-#Image width in pixel: 7952
-#Image height in pixel: 5304
+  max(abs(Dc),abs(Dc1))
 
-oside=function(dside, f= 35, H=H, w=35.9){
-  oside=(1-((dside*f)/(H*w)))*100
 }
-#(oside(0.3, H=300))
+
+
+
+
