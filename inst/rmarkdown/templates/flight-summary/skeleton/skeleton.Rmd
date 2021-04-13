@@ -44,7 +44,6 @@ To use the object created in the code block you can use "inline" code. So for ex
 
 To create a "report" once you are happy with the text and code in the RMarkdown document you can click on the "knit" button. This will run all the code blocks and then will create an output (currently set to a html file but there is an option for pdf or word. html is the most flexible format and works more naturally with R code, you may need to change some of the plotting functions to get them to look good in pdf format, for example). At any point you can also run the code in a block by clicking on the green button at the top of the code block. You can run all code blocks by clicking on run in the menu at the top of the page. It is important to remember that the code blocks are run sequentially so if you create an object in the second codeblock you could not make use of it until after that codeblock has run. 
 
-
 ## Gather all the Flights in to a single dataset
 
 ```{r make a large dataset, echo=TRUE, message=FALSE, warning=FALSE}
@@ -321,9 +320,12 @@ all_dfs_reduced%>%
 ## Photograph area
 
 ```{r}
-all_dfs_reduced %>% 
+all_dfs_reduced=all_dfs_reduced %>% 
   rowwise() %>% 
-  mutate("photo_area"=Kulan::get_photo_area(altitude = alt_above_ground,banking_angle = banking_angle)) %>% 
+  mutate("photo_area"=Kulan::get_photo_area(altitude = alt_above_ground,banking_angle = banking_angle))
+
+
+all_dfs_reduced %>% 
   dplyr::select(photo_area) %>% 
   ggplot(aes(photo_area))+
   labs(x="photograph area m2")+
@@ -332,19 +334,684 @@ all_dfs_reduced %>%
 ```
 ## Overlap
 
-The forward overlap is the percentage overlap that two consecutive images have. 
+The forward overlap is the percentage overlap that two consecutive images have. To calculate this value we could not use a single function so have developed a script to follow the process. This is hidden here in the rendered Markdown but contained in the script.
 
-```{r}
-over=distance_df %>% 
-group_by(Flight) %>%
-rowwise() %>% 
-mutate(overlap=Kulan::oforward( dforwar=coord_dif[,1],H=alt_above_ground ))
+```{r, echo=FALSE}
+overlap_df=distance_df %>% 
+  select(photo_no, alt_above_ground, coord_dif, banking_angle, Flight)
 
-over %>%
-  mutate(overlap=ifelse(overlap<0,0,overlap)) %>% # this makes any overlap less than 0 == 0
-  ggplot(aes(overlap)) + 
-  geom_histogram(fill="blue")+
-  facet_wrap(~Flight)
+overlap_df$altitude1=overlap_df$alt_above_ground
+overlap_df$altitude2=lead(overlap_df$altitude1)
+overlap_df$distance=overlap_df$coord_dif
+overlap_df$banking_angle1=overlap_df$banking_angle
+overlap_df$banking_angle2=lead(overlap_df$banking_angle1)
+
+
+overlap_df1=overlap_df %>%
+  filter(Flight=="Flight1")
+
+overlap_df1$forward_overlap=rep(NA,dim(overlap_df1)[1])
+
+
+for (i in 2:dim(overlap_df1)[1]){
+
+  altitude1=overlap_df1$altitude1[i]
+  altitude2=overlap_df1$altitude2[i]
+  forward_distance=overlap_df1$distance[i]
+  angle_of_camera=25
+  banking_angle1=overlap_df1$banking_angle1[i]
+  banking_angle2=overlap_df1$banking_angle2[i]
+
+
+
+  #Picture1
+  h1=altitude1
+  # angle of camera1
+  theta1 <- Kulan::deg_to_rad(angle_of_camera)
+  # horizontal field of view
+  phi1 <- Kulan::deg_to_rad(Kulan::get_HFOV()+banking_angle1)
+  # vertical field of view
+  omega1 <- Kulan::deg_to_rad(Kulan::get_VFOV())
+  Dc1= h1*tan(theta1-phi1/2)
+  Df1= h1*tan(theta1+phi1/2)
+  Dm1= h1*tan(theta1+phi1*0.5/2)
+  Rc1=sqrt(h1^2+Dc1^2)
+  Rm1=sqrt(h1^2+Dm1^2)
+  Rf1=sqrt(h1^2+Df1^2)
+
+  #Picture2
+  h2=altitude2
+  # angle of camera2
+  theta2 <- Kulan::deg_to_rad(angle_of_camera)
+  # horizontal field of view
+  phi2 <- Kulan::deg_to_rad(Kulan::get_HFOV()+banking_angle2)
+  # vertical field of view
+  omega2 <- Kulan::deg_to_rad(Kulan::get_VFOV())
+  Dc2= h2*tan(theta2-phi2/2)
+  Df2= h2*tan(theta2+phi2/2)
+  Dm2= h2*tan(theta2+phi2*0.5/2)
+  Rc2=sqrt(h2^2+Dc2^2)
+  Rm2=sqrt(h2^2+Dm2^2)
+  Rf2=sqrt(h2^2+Df2^2)
+
+  #Work out overlap between trapezoids
+  Wc1=2*(Dc1^2+h1^2)^0.5*tan(omega1/2)
+  Wm1=2*((Dc1+Df1/2)^2+h1^2)^0.5*tan(omega1/2)
+  Wf1=2*(Df1^2+h1^2)^0.5*tan(omega1/2)
+  positions1 <- data.frame(
+    x = c(0, 0, Df1-Dc1, Df1-Dc1),
+    y = c(-Wc1/2, Wc1/2, -Wf1/2, Wf1/2)
+  )
+
+  Wc2=2*(Dc2^2+h2^2)^0.5*tan(omega2/2)
+  Wm2=2*((Dc2+Df2/2)^2+h2^2)^0.5*tan(omega2/2)
+  Wf2=2*(Df2^2+h2^2)^0.5*tan(omega2/2)
+  positions2 <- data.frame(
+    x = c(0, 0, Df2-Dc2, Df2-Dc2),
+    y = c(-Wc2/2+forward_distance, Wc2/2+forward_distance,
+          -Wf2/2+forward_distance, Wf2/2+forward_distance)
+  )
+
+  library(sp)
+  p = Polygon(positions1[c(1,2,4,3),] )
+  ps = Polygons(list(p),1)
+  sps = SpatialPolygons(list(ps))
+  p2 = Polygon(positions2[c(1,2,4,3),] )
+  ps2 = Polygons(list(p2),1)
+  sps2 = SpatialPolygons(list(ps2))
+  #plot(rgeos::gIntersection(sps,sps2), add=TRUE)
+  area=rgeos::gIntersection(sps,sps2)
+  if(is.null(area)){
+    overlap_df1$forward_overlap[i]=0
+  }else{
+  overlap_df1$forward_overlap[i]=area@polygons[[1]]@area
+  }
+}
+overlap_df1$forward_overlap
+
+###############################################################
+
+overlap_df2=overlap_df %>%
+  filter(Flight=="Flight2")
+
+overlap_df2$forward_overlap=rep(NA,dim(overlap_df2)[1])
+
+
+for (i in 2:dim(overlap_df2)[1]){
+
+  altitude1=overlap_df2$altitude1[i]
+  altitude2=overlap_df2$altitude2[i]
+  forward_distance=overlap_df2$distance[i]
+  angle_of_camera=25
+  banking_angle1=overlap_df2$banking_angle1[i]
+  banking_angle2=overlap_df2$banking_angle2[i]
+
+
+
+  #Picture1
+  h1=altitude1
+  # angle of camera1
+  theta1 <- Kulan::deg_to_rad(angle_of_camera)
+  # horizontal field of view
+  phi1 <- Kulan::deg_to_rad(Kulan::get_HFOV()+banking_angle1)
+  # vertical field of view
+  omega1 <- Kulan::deg_to_rad(Kulan::get_VFOV())
+  Dc1= h1*tan(theta1-phi1/2)
+  Df1= h1*tan(theta1+phi1/2)
+  Dm1= h1*tan(theta1+phi1*0.5/2)
+  Rc1=sqrt(h1^2+Dc1^2)
+  Rm1=sqrt(h1^2+Dm1^2)
+  Rf1=sqrt(h1^2+Df1^2)
+
+  #Picture2
+  h2=altitude2
+  # angle of camera2
+  theta2 <- Kulan::deg_to_rad(angle_of_camera)
+  # horizontal field of view
+  phi2 <- Kulan::deg_to_rad(Kulan::get_HFOV()+banking_angle2)
+  # vertical field of view
+  omega2 <- Kulan::deg_to_rad(Kulan::get_VFOV())
+  Dc2= h2*tan(theta2-phi2/2)
+  Df2= h2*tan(theta2+phi2/2)
+  Dm2= h2*tan(theta2+phi2*0.5/2)
+  Rc2=sqrt(h2^2+Dc2^2)
+  Rm2=sqrt(h2^2+Dm2^2)
+  Rf2=sqrt(h2^2+Df2^2)
+
+  #Work out overlap between trapezoids
+  Wc1=2*(Dc1^2+h1^2)^0.5*tan(omega1/2)
+  Wm1=2*((Dc1+Df1/2)^2+h1^2)^0.5*tan(omega1/2)
+  Wf1=2*(Df1^2+h1^2)^0.5*tan(omega1/2)
+  positions1 <- data.frame(
+    x = c(0, 0, Df1-Dc1, Df1-Dc1),
+    y = c(-Wc1/2, Wc1/2, -Wf1/2, Wf1/2)
+  )
+
+  Wc2=2*(Dc2^2+h2^2)^0.5*tan(omega2/2)
+  Wm2=2*((Dc2+Df2/2)^2+h2^2)^0.5*tan(omega2/2)
+  Wf2=2*(Df2^2+h2^2)^0.5*tan(omega2/2)
+  positions2 <- data.frame(
+    x = c(0, 0, Df2-Dc2, Df2-Dc2),
+    y = c(-Wc2/2+forward_distance, Wc2/2+forward_distance,
+          -Wf2/2+forward_distance, Wf2/2+forward_distance)
+  )
+
+  library(sp)
+  p = Polygon(positions1[c(1,2,4,3),] )
+  ps = Polygons(list(p),1)
+  sps = SpatialPolygons(list(ps))
+  p2 = Polygon(positions2[c(1,2,4,3),] )
+  ps2 = Polygons(list(p2),1)
+  sps2 = SpatialPolygons(list(ps2))
+  #plot(rgeos::gIntersection(sps,sps2), add=TRUE)
+  area=rgeos::gIntersection(sps,sps2)
+  if(is.null(area)){
+    overlap_df2$forward_overlap[i]=0
+  }else{
+    overlap_df2$forward_overlap[i]=area@polygons[[1]]@area
+  }
+}
+overlap_df2$forward_overlap
+
+########################################################
+overlap_df3=overlap_df %>%
+  filter(Flight=="Flight3")
+
+overlap_df3$forward_overlap=rep(NA,dim(overlap_df3)[1])
+
+
+for (i in 2:dim(overlap_df3)[1]){
+
+  altitude1=overlap_df3$altitude1[i]
+  altitude2=overlap_df3$altitude2[i]
+  forward_distance=overlap_df3$distance[i]
+  angle_of_camera=25
+  banking_angle1=overlap_df3$banking_angle1[i]
+  banking_angle2=overlap_df3$banking_angle2[i]
+
+
+
+  #Picture1
+  h1=altitude1
+  # angle of camera1
+  theta1 <- Kulan::deg_to_rad(angle_of_camera)
+  # horizontal field of view
+  phi1 <- Kulan::deg_to_rad(Kulan::get_HFOV()+banking_angle1)
+  # vertical field of view
+  omega1 <- Kulan::deg_to_rad(Kulan::get_VFOV())
+  Dc1= h1*tan(theta1-phi1/2)
+  Df1= h1*tan(theta1+phi1/2)
+  Dm1= h1*tan(theta1+phi1*0.5/2)
+  Rc1=sqrt(h1^2+Dc1^2)
+  Rm1=sqrt(h1^2+Dm1^2)
+  Rf1=sqrt(h1^2+Df1^2)
+
+  #Picture2
+  h2=altitude2
+  # angle of camera2
+  theta2 <- Kulan::deg_to_rad(angle_of_camera)
+  # horizontal field of view
+  phi2 <- Kulan::deg_to_rad(Kulan::get_HFOV()+banking_angle2)
+  # vertical field of view
+  omega2 <- Kulan::deg_to_rad(Kulan::get_VFOV())
+  Dc2= h2*tan(theta2-phi2/2)
+  Df2= h2*tan(theta2+phi2/2)
+  Dm2= h2*tan(theta2+phi2*0.5/2)
+  Rc2=sqrt(h2^2+Dc2^2)
+  Rm2=sqrt(h2^2+Dm2^2)
+  Rf2=sqrt(h2^2+Df2^2)
+
+  #Work out overlap between trapezoids
+  Wc1=2*(Dc1^2+h1^2)^0.5*tan(omega1/2)
+  Wm1=2*((Dc1+Df1/2)^2+h1^2)^0.5*tan(omega1/2)
+  Wf1=2*(Df1^2+h1^2)^0.5*tan(omega1/2)
+  positions1 <- data.frame(
+    x = c(0, 0, Df1-Dc1, Df1-Dc1),
+    y = c(-Wc1/2, Wc1/2, -Wf1/2, Wf1/2)
+  )
+
+  Wc2=2*(Dc2^2+h2^2)^0.5*tan(omega2/2)
+  Wm2=2*((Dc2+Df2/2)^2+h2^2)^0.5*tan(omega2/2)
+  Wf2=2*(Df2^2+h2^2)^0.5*tan(omega2/2)
+  positions2 <- data.frame(
+    x = c(0, 0, Df2-Dc2, Df2-Dc2),
+    y = c(-Wc2/2+forward_distance, Wc2/2+forward_distance,
+          -Wf2/2+forward_distance, Wf2/2+forward_distance)
+  )
+
+  library(sp)
+  p = Polygon(positions1[c(1,2,4,3),] )
+  ps = Polygons(list(p),1)
+  sps = SpatialPolygons(list(ps))
+  p2 = Polygon(positions2[c(1,2,4,3),] )
+  ps2 = Polygons(list(p2),1)
+  sps2 = SpatialPolygons(list(ps2))
+  #plot(rgeos::gIntersection(sps,sps2), add=TRUE)
+  area=rgeos::gIntersection(sps,sps2)
+  if(is.null(area)){
+    overlap_df3$forward_overlap[i]=0
+  }else{
+    overlap_df3$forward_overlap[i]=area@polygons[[1]]@area
+  }
+}
+overlap_df3$forward_overlap
+
+###########################################################
+
+overlap_df4=overlap_df %>%
+  filter(Flight=="Flight4")
+
+overlap_df4$forward_overlap=rep(NA,dim(overlap_df4)[1])
+
+for (i in 2:dim(overlap_df4)[1]){
+
+  altitude1=overlap_df4$altitude1[i]
+  altitude2=overlap_df4$altitude2[i]
+  forward_distance=overlap_df4$distance[i]
+  angle_of_camera=25
+  banking_angle1=overlap_df4$banking_angle1[i]
+  banking_angle2=overlap_df4$banking_angle2[i]
+
+
+
+  #Picture1
+  h1=altitude1
+  # angle of camera1
+  theta1 <- Kulan::deg_to_rad(angle_of_camera)
+  # horizontal field of view
+  phi1 <- Kulan::deg_to_rad(Kulan::get_HFOV()+banking_angle1)
+  # vertical field of view
+  omega1 <- Kulan::deg_to_rad(Kulan::get_VFOV())
+  Dc1= h1*tan(theta1-phi1/2)
+  Df1= h1*tan(theta1+phi1/2)
+  Dm1= h1*tan(theta1+phi1*0.5/2)
+  Rc1=sqrt(h1^2+Dc1^2)
+  Rm1=sqrt(h1^2+Dm1^2)
+  Rf1=sqrt(h1^2+Df1^2)
+
+  #Picture2
+  h2=altitude2
+  # angle of camera2
+  theta2 <- Kulan::deg_to_rad(angle_of_camera)
+  # horizontal field of view
+  phi2 <- Kulan::deg_to_rad(Kulan::get_HFOV()+banking_angle2)
+  # vertical field of view
+  omega2 <- Kulan::deg_to_rad(Kulan::get_VFOV())
+  Dc2= h2*tan(theta2-phi2/2)
+  Df2= h2*tan(theta2+phi2/2)
+  Dm2= h2*tan(theta2+phi2*0.5/2)
+  Rc2=sqrt(h2^2+Dc2^2)
+  Rm2=sqrt(h2^2+Dm2^2)
+  Rf2=sqrt(h2^2+Df2^2)
+
+  #Work out overlap between trapezoids
+  Wc1=2*(Dc1^2+h1^2)^0.5*tan(omega1/2)
+  Wm1=2*((Dc1+Df1/2)^2+h1^2)^0.5*tan(omega1/2)
+  Wf1=2*(Df1^2+h1^2)^0.5*tan(omega1/2)
+  positions1 <- data.frame(
+    x = c(0, 0, Df1-Dc1, Df1-Dc1),
+    y = c(-Wc1/2, Wc1/2, -Wf1/2, Wf1/2)
+  )
+
+  Wc2=2*(Dc2^2+h2^2)^0.5*tan(omega2/2)
+  Wm2=2*((Dc2+Df2/2)^2+h2^2)^0.5*tan(omega2/2)
+  Wf2=2*(Df2^2+h2^2)^0.5*tan(omega2/2)
+  positions2 <- data.frame(
+    x = c(0, 0, Df2-Dc2, Df2-Dc2),
+    y = c(-Wc2/2+forward_distance, Wc2/2+forward_distance,
+          -Wf2/2+forward_distance, Wf2/2+forward_distance)
+  )
+
+  library(sp)
+  p = Polygon(positions1[c(1,2,4,3),] )
+  ps = Polygons(list(p),1)
+  sps = SpatialPolygons(list(ps))
+  p2 = Polygon(positions2[c(1,2,4,3),] )
+  ps2 = Polygons(list(p2),1)
+  sps2 = SpatialPolygons(list(ps2))
+  #plot(rgeos::gIntersection(sps,sps2), add=TRUE)
+  area=rgeos::gIntersection(sps,sps2)
+  if(is.null(area)){
+    overlap_df4$forward_overlap[i]=0
+  }else{
+    overlap_df4$forward_overlap[i]=area@polygons[[1]]@area
+  }
+}
+overlap_df4$forward_overlap
+
+###############################################################
+overlap_df5=overlap_df %>%
+  filter(Flight=="Flight5")
+
+overlap_df5$forward_overlap=rep(NA,dim(overlap_df5)[1])
+
+
+for (i in 2:dim(overlap_df5)[1]){
+
+  altitude1=overlap_df5$altitude1[i]
+  altitude2=overlap_df5$altitude2[i]
+  forward_distance=overlap_df5$distance[i]
+  angle_of_camera=25
+  banking_angle1=overlap_df5$banking_angle1[i]
+  banking_angle2=overlap_df5$banking_angle2[i]
+
+
+
+  #Picture1
+  h1=altitude1
+  # angle of camera1
+  theta1 <- Kulan::deg_to_rad(angle_of_camera)
+  # horizontal field of view
+  phi1 <- Kulan::deg_to_rad(Kulan::get_HFOV()+banking_angle1)
+  # vertical field of view
+  omega1 <- Kulan::deg_to_rad(Kulan::get_VFOV())
+  Dc1= h1*tan(theta1-phi1/2)
+  Df1= h1*tan(theta1+phi1/2)
+  Dm1= h1*tan(theta1+phi1*0.5/2)
+  Rc1=sqrt(h1^2+Dc1^2)
+  Rm1=sqrt(h1^2+Dm1^2)
+  Rf1=sqrt(h1^2+Df1^2)
+
+  #Picture2
+  h2=altitude2
+  # angle of camera2
+  theta2 <- Kulan::deg_to_rad(angle_of_camera)
+  # horizontal field of view
+  phi2 <- Kulan::deg_to_rad(Kulan::get_HFOV()+banking_angle2)
+  # vertical field of view
+  omega2 <- Kulan::deg_to_rad(Kulan::get_VFOV())
+  Dc2= h2*tan(theta2-phi2/2)
+  Df2= h2*tan(theta2+phi2/2)
+  Dm2= h2*tan(theta2+phi2*0.5/2)
+  Rc2=sqrt(h2^2+Dc2^2)
+  Rm2=sqrt(h2^2+Dm2^2)
+  Rf2=sqrt(h2^2+Df2^2)
+
+  #Work out overlap between trapezoids
+  Wc1=2*(Dc1^2+h1^2)^0.5*tan(omega1/2)
+  Wm1=2*((Dc1+Df1/2)^2+h1^2)^0.5*tan(omega1/2)
+  Wf1=2*(Df1^2+h1^2)^0.5*tan(omega1/2)
+  positions1 <- data.frame(
+    x = c(0, 0, Df1-Dc1, Df1-Dc1),
+    y = c(-Wc1/2, Wc1/2, -Wf1/2, Wf1/2)
+  )
+
+  Wc2=2*(Dc2^2+h2^2)^0.5*tan(omega2/2)
+  Wm2=2*((Dc2+Df2/2)^2+h2^2)^0.5*tan(omega2/2)
+  Wf2=2*(Df2^2+h2^2)^0.5*tan(omega2/2)
+  positions2 <- data.frame(
+    x = c(0, 0, Df2-Dc2, Df2-Dc2),
+    y = c(-Wc2/2+forward_distance, Wc2/2+forward_distance,
+          -Wf2/2+forward_distance, Wf2/2+forward_distance)
+  )
+
+  library(sp)
+  p = Polygon(positions1[c(1,2,4,3),] )
+  ps = Polygons(list(p),1)
+  sps = SpatialPolygons(list(ps))
+  p2 = Polygon(positions2[c(1,2,4,3),] )
+  ps2 = Polygons(list(p2),1)
+  sps2 = SpatialPolygons(list(ps2))
+  #plot(rgeos::gIntersection(sps,sps2), add=TRUE)
+  area=rgeos::gIntersection(sps,sps2)
+  if(is.null(area)){
+    overlap_df5$forward_overlap[i]=0
+  }else{
+    overlap_df5$forward_overlap[i]=area@polygons[[1]]@area
+  }
+}
+overlap_df5$forward_overlap
+
+################################################################
+overlap_df6=overlap_df %>%
+  filter(Flight=="Flight6")
+
+overlap_df6$forward_overlap=rep(NA,dim(overlap_df6)[1])
+
+
+for (i in 2:dim(overlap_df6)[1]){
+
+  altitude1=overlap_df6$altitude1[i]
+  altitude2=overlap_df6$altitude2[i]
+  forward_distance=overlap_df6$distance[i]
+  angle_of_camera=25
+  banking_angle1=overlap_df6$banking_angle1[i]
+  banking_angle2=overlap_df6$banking_angle2[i]
+
+
+
+  #Picture1
+  h1=altitude1
+  # angle of camera1
+  theta1 <- Kulan::deg_to_rad(angle_of_camera)
+  # horizontal field of view
+  phi1 <- Kulan::deg_to_rad(Kulan::get_HFOV()+banking_angle1)
+  # vertical field of view
+  omega1 <- Kulan::deg_to_rad(Kulan::get_VFOV())
+  Dc1= h1*tan(theta1-phi1/2)
+  Df1= h1*tan(theta1+phi1/2)
+  Dm1= h1*tan(theta1+phi1*0.5/2)
+  Rc1=sqrt(h1^2+Dc1^2)
+  Rm1=sqrt(h1^2+Dm1^2)
+  Rf1=sqrt(h1^2+Df1^2)
+
+  #Picture2
+  h2=altitude2
+  # angle of camera2
+  theta2 <- Kulan::deg_to_rad(angle_of_camera)
+  # horizontal field of view
+  phi2 <- Kulan::deg_to_rad(Kulan::get_HFOV()+banking_angle2)
+  # vertical field of view
+  omega2 <- Kulan::deg_to_rad(Kulan::get_VFOV())
+  Dc2= h2*tan(theta2-phi2/2)
+  Df2= h2*tan(theta2+phi2/2)
+  Dm2= h2*tan(theta2+phi2*0.5/2)
+  Rc2=sqrt(h2^2+Dc2^2)
+  Rm2=sqrt(h2^2+Dm2^2)
+  Rf2=sqrt(h2^2+Df2^2)
+
+  #Work out overlap between trapezoids
+  Wc1=2*(Dc1^2+h1^2)^0.5*tan(omega1/2)
+  Wm1=2*((Dc1+Df1/2)^2+h1^2)^0.5*tan(omega1/2)
+  Wf1=2*(Df1^2+h1^2)^0.5*tan(omega1/2)
+  positions1 <- data.frame(
+    x = c(0, 0, Df1-Dc1, Df1-Dc1),
+    y = c(-Wc1/2, Wc1/2, -Wf1/2, Wf1/2)
+  )
+
+  Wc2=2*(Dc2^2+h2^2)^0.5*tan(omega2/2)
+  Wm2=2*((Dc2+Df2/2)^2+h2^2)^0.5*tan(omega2/2)
+  Wf2=2*(Df2^2+h2^2)^0.5*tan(omega2/2)
+  positions2 <- data.frame(
+    x = c(0, 0, Df2-Dc2, Df2-Dc2),
+    y = c(-Wc2/2+forward_distance, Wc2/2+forward_distance,
+          -Wf2/2+forward_distance, Wf2/2+forward_distance)
+  )
+
+  library(sp)
+  p = Polygon(positions1[c(1,2,4,3),] )
+  ps = Polygons(list(p),1)
+  sps = SpatialPolygons(list(ps))
+  p2 = Polygon(positions2[c(1,2,4,3),] )
+  ps2 = Polygons(list(p2),1)
+  sps2 = SpatialPolygons(list(ps2))
+  #plot(rgeos::gIntersection(sps,sps2), add=TRUE)
+  area=rgeos::gIntersection(sps,sps2)
+  if(is.null(area)){
+    overlap_df6$forward_overlap[i]=0
+  }else{
+    overlap_df6$forward_overlap[i]=area@polygons[[1]]@area
+  }
+}
+overlap_df6$forward_overlap
+###############################################################
+overlap_df7=overlap_df %>%
+  filter(Flight=="Flight7")
+
+overlap_df7$forward_overlap=rep(NA,dim(overlap_df7)[1])
+
+
+for (i in 2:dim(overlap_df7)[1]){
+
+  altitude1=overlap_df7$altitude1[i]
+  altitude2=overlap_df7$altitude2[i]
+  forward_distance=overlap_df7$distance[i]
+  angle_of_camera=25
+  banking_angle1=overlap_df7$banking_angle1[i]
+  banking_angle2=overlap_df7$banking_angle2[i]
+
+
+
+  #Picture1
+  h1=altitude1
+  # angle of camera1
+  theta1 <- Kulan::deg_to_rad(angle_of_camera)
+  # horizontal field of view
+  phi1 <- Kulan::deg_to_rad(Kulan::get_HFOV()+banking_angle1)
+  # vertical field of view
+  omega1 <- Kulan::deg_to_rad(Kulan::get_VFOV())
+  Dc1= h1*tan(theta1-phi1/2)
+  Df1= h1*tan(theta1+phi1/2)
+  Dm1= h1*tan(theta1+phi1*0.5/2)
+  Rc1=sqrt(h1^2+Dc1^2)
+  Rm1=sqrt(h1^2+Dm1^2)
+  Rf1=sqrt(h1^2+Df1^2)
+
+  #Picture2
+  h2=altitude2
+  # angle of camera2
+  theta2 <- Kulan::deg_to_rad(angle_of_camera)
+  # horizontal field of view
+  phi2 <- Kulan::deg_to_rad(Kulan::get_HFOV()+banking_angle2)
+  # vertical field of view
+  omega2 <- Kulan::deg_to_rad(Kulan::get_VFOV())
+  Dc2= h2*tan(theta2-phi2/2)
+  Df2= h2*tan(theta2+phi2/2)
+  Dm2= h2*tan(theta2+phi2*0.5/2)
+  Rc2=sqrt(h2^2+Dc2^2)
+  Rm2=sqrt(h2^2+Dm2^2)
+  Rf2=sqrt(h2^2+Df2^2)
+
+  #Work out overlap between trapezoids
+  Wc1=2*(Dc1^2+h1^2)^0.5*tan(omega1/2)
+  Wm1=2*((Dc1+Df1/2)^2+h1^2)^0.5*tan(omega1/2)
+  Wf1=2*(Df1^2+h1^2)^0.5*tan(omega1/2)
+  positions1 <- data.frame(
+    x = c(0, 0, Df1-Dc1, Df1-Dc1),
+    y = c(-Wc1/2, Wc1/2, -Wf1/2, Wf1/2)
+  )
+
+  Wc2=2*(Dc2^2+h2^2)^0.5*tan(omega2/2)
+  Wm2=2*((Dc2+Df2/2)^2+h2^2)^0.5*tan(omega2/2)
+  Wf2=2*(Df2^2+h2^2)^0.5*tan(omega2/2)
+  positions2 <- data.frame(
+    x = c(0, 0, Df2-Dc2, Df2-Dc2),
+    y = c(-Wc2/2+forward_distance, Wc2/2+forward_distance,
+          -Wf2/2+forward_distance, Wf2/2+forward_distance)
+  )
+
+  library(sp)
+  p = Polygon(positions1[c(1,2,4,3),] )
+  ps = Polygons(list(p),1)
+  sps = SpatialPolygons(list(ps))
+  p2 = Polygon(positions2[c(1,2,4,3),] )
+  ps2 = Polygons(list(p2),1)
+  sps2 = SpatialPolygons(list(ps2))
+  #plot(rgeos::gIntersection(sps,sps2), add=TRUE)
+  area=rgeos::gIntersection(sps,sps2)
+  if(is.null(area)){
+    overlap_df7$forward_overlap[i]=0
+  }else{
+    overlap_df7$forward_overlap[i]=area@polygons[[1]]@area
+  }
+}
+overlap_df7$forward_overlap
+###################################################################
+overlap_df8=overlap_df %>%
+  filter(Flight=="Flight8")
+
+overlap_df8$forward_overlap=rep(NA,dim(overlap_df8)[1])
+
+dim(overlap_df8)
+for (i in 2:1532){
+
+  altitude1=overlap_df8$altitude1[i]
+  altitude2=overlap_df8$altitude2[i]
+  forward_distance=overlap_df8$distance[i]
+  angle_of_camera=25
+  banking_angle1=overlap_df8$banking_angle1[i]
+  banking_angle2=overlap_df8$banking_angle2[i]
+
+
+
+  #Picture1
+  h1=altitude1
+  # angle of camera1
+  theta1 <- Kulan::deg_to_rad(angle_of_camera)
+  # horizontal field of view
+  phi1 <- Kulan::deg_to_rad(Kulan::get_HFOV()+banking_angle1)
+  # vertical field of view
+  omega1 <- Kulan::deg_to_rad(Kulan::get_VFOV())
+  Dc1= h1*tan(theta1-phi1/2)
+  Df1= h1*tan(theta1+phi1/2)
+  Dm1= h1*tan(theta1+phi1*0.5/2)
+  Rc1=sqrt(h1^2+Dc1^2)
+  Rm1=sqrt(h1^2+Dm1^2)
+  Rf1=sqrt(h1^2+Df1^2)
+
+  #Picture2
+  h2=altitude2
+  # angle of camera2
+  theta2 <- Kulan::deg_to_rad(angle_of_camera)
+  # horizontal field of view
+  phi2 <- Kulan::deg_to_rad(Kulan::get_HFOV()+banking_angle2)
+  # vertical field of view
+  omega2 <- Kulan::deg_to_rad(Kulan::get_VFOV())
+  Dc2= h2*tan(theta2-phi2/2)
+  Df2= h2*tan(theta2+phi2/2)
+  Dm2= h2*tan(theta2+phi2*0.5/2)
+  Rc2=sqrt(h2^2+Dc2^2)
+  Rm2=sqrt(h2^2+Dm2^2)
+  Rf2=sqrt(h2^2+Df2^2)
+
+  #Work out overlap between trapezoids
+  Wc1=2*(Dc1^2+h1^2)^0.5*tan(omega1/2)
+  Wm1=2*((Dc1+Df1/2)^2+h1^2)^0.5*tan(omega1/2)
+  Wf1=2*(Df1^2+h1^2)^0.5*tan(omega1/2)
+  positions1 <- data.frame(
+    x = c(0, 0, Df1-Dc1, Df1-Dc1),
+    y = c(-Wc1/2, Wc1/2, -Wf1/2, Wf1/2)
+  )
+
+  Wc2=2*(Dc2^2+h2^2)^0.5*tan(omega2/2)
+  Wm2=2*((Dc2+Df2/2)^2+h2^2)^0.5*tan(omega2/2)
+  Wf2=2*(Df2^2+h2^2)^0.5*tan(omega2/2)
+  positions2 <- data.frame(
+    x = c(0, 0, Df2-Dc2, Df2-Dc2),
+    y = c(-Wc2/2+forward_distance, Wc2/2+forward_distance,
+          -Wf2/2+forward_distance, Wf2/2+forward_distance)
+  )
+
+  library(sp)
+  p = Polygon(positions1[c(1,2,4,3),] )
+  ps = Polygons(list(p),1)
+  sps = SpatialPolygons(list(ps))
+  p2 = Polygon(positions2[c(1,2,4,3),] )
+  ps2 = Polygons(list(p2),1)
+  sps2 = SpatialPolygons(list(ps2))
+  #plot(rgeos::gIntersection(sps,sps2), add=TRUE)
+  area=rgeos::gIntersection(sps,sps2)
+  if(is.null(area)){
+    overlap_df8$forward_overlap[i]=0
+  }else{
+    overlap_df8$forward_overlap[i]=area@polygons[[1]]@area
+  }
+}
+overlap_df8$forward_overlap
+
+overlap_all=rbind(overlap_df1,overlap_df2,overlap_df3,overlap_df4,
+      overlap_df5,overlap_df6,overlap_df7, overlap_df8)
+
 
 ```
 
@@ -352,23 +1019,39 @@ The mean overlap per Flight is
 
 
 ```{r}
-over %>%
-  mutate(overlap=ifelse(overlap<0,0,overlap)) %>% # this makes any overlap less than 0 == 0
-  group_by(Flight) %>% 
-  summarise(mnOver=mean(overlap, na.rm=TRUE))
+overlap_all %>%
+    group_by(Flight) %>% 
+  summarise(mnOver=mean(forward_overlap, na.rm=TRUE))
 
 ```
 
 ```{r}
-over %>%
-  mutate(overlap=ifelse(overlap<0,0,overlap)) %>% # this makes any overlap less than 0 == 0
+distance_df %>% 
+  left_join(overlap_all, by=c("photo_no"="photo_no"))%>%
   mutate(time=as.POSIXct(time,format="%H:%M:%S")) %>% 
-  ggplot(aes(time,overlap)) + 
+  ggplot(aes(time,forward_overlap)) + 
+  geom_point(colour="darkblue")+
+  geom_line(colour="darkblue")+
+  facet_wrap(~Flight.x, scales = "free")
+
+```
+
+## Side overlap
+
+```{r}
+all_dfs_reduced=all_dfs_reduced %>% 
+  rowwise() %>% 
+  mutate("side_overlap"=side_overlap(altitude = alt_above_ground, banking_angle = banking_angle))
+
+all_dfs_reduced %>%
+  mutate(time=as.POSIXct(time,format="%H:%M:%S")) %>% 
+  ggplot(aes(time,side_overlap)) + 
   geom_point(colour="darkblue")+
   geom_line(colour="darkblue")+
   facet_wrap(~Flight, scales = "free")
 
 ```
+
 ## Ground surface resolution
 
 
@@ -378,8 +1061,16 @@ GSR_all_dfs=all_dfs_reduced %>%
                                  )[1])%>%  mutate("GSD_mid"=Kulan::GSD(altitude = alt_above_ground)[2]) %>% mutate("GSD_far"=Kulan::GSD(altitude = alt_above_ground)[3])
 GSR_all_dfs %>% 
   group_by(Flight) %>% 
-  summarise(m_per_pixel_near=mean(unlist(GSD_near), na.rm=TRUE), sd_m_per_pixel_near=sd(unlist(GSD_near), na.rm=TRUE),m_per_pixel_far=mean(unlist(GSD_far), na.rm=TRUE), sd_m_per_pixel_far=sd(unlist(GSD_far), na.rm=TRUE))
+  summarise(cm_per_pixel_near=mean(unlist(GSD_near), na.rm=TRUE), sd_cm_per_pixel_near=sd(unlist(GSD_near), na.rm=TRUE),cm_per_pixel_far=mean(unlist(GSD_far), na.rm=TRUE), sd_cm_per_pixel_far=sd(unlist(GSD_far), na.rm=TRUE))
 
+```
+
+## Distance of each flight
+
+```{r}
+(dist_sum=distance_df %>% 
+  group_by(Flight) %>% 
+  summarise(Distance=sum(coord_dif, na.rm=TRUE)))
 ```
 
 
@@ -390,25 +1081,29 @@ GSR_all_dfs %>%
 ```{r}
 output_summary_table=all_dfs_reduced %>% 
   group_by(Flight) %>% 
-  summarise(Date=min(date),  Time_start=min(time), Time_end=max(time), Mean_Altitude=mean(alt_above_ground, na.rm=TRUE), SD_Altitude=sd(alt_above_ground, na.rm=TRUE), Mean_GPS_Speed= mean(gps_speed, na.rm=TRUE),SD_GPS_Speed= sd(gps_speed, na.rm=TRUE), Mean_Banking= mean(banking_angle, na.rm=TRUE),SD_Banking= sd(banking_angle, na.rm=TRUE), Mean_Strip_Width=mean(strip_width, na.rm=TRUE), SD_Strip_width=sd(strip_width, na.rm=TRUE))
+  summarise(Date=min(date),  Time_start=min(time), Time_end=max(time), Mean_Altitude=mean(alt_above_ground, na.rm=TRUE), SD_Altitude=sd(alt_above_ground, na.rm=TRUE), Mean_GPS_Speed= mean(gps_speed, na.rm=TRUE),SD_GPS_Speed= sd(gps_speed, na.rm=TRUE), Mean_Banking= mean(banking_angle, na.rm=TRUE),SD_Banking= sd(banking_angle, na.rm=TRUE), Mean_Strip_Width=mean(strip_width, na.rm=TRUE), SD_Strip_width=sd(strip_width, na.rm=TRUE), Mean_side_overlap=mean(side_overlap, na.rm=TRUE), SD_side_overlap=sd(side_overlap,na.rm=TRUE), Mean_photo_area=mean(photo_area, na.rm=TRUE), SD_photo_area=sd(photo_area, na.rm=TRUE))
 
-over_sum=over %>% 
+over_sum=overlap_all %>% 
   group_by(Flight) %>% 
-  summarise(Mean_Overlap=mean(overlap, na.rm=TRUE), SD_Overlap=sd(overlap, na.rm=TRUE))
+  summarise(Mean_Overlap=mean(forward_overlap, na.rm=TRUE), SD_Overlap=sd(forward_overlap, na.rm=TRUE))
 
 no_photos=all_dfs_reduced %>% 
   group_by(Flight) %>% 
   tally()
 
-output_summary_table=output_summary_table %>% inner_join(over_sum)
+output_summary_table=output_summary_table %>% inner_join(over_sum, by=c("Flight"="Flight"))
 
 output_summary_table=output_summary_table %>% inner_join(GSR_all_dfs)
 
 output_summary_table =output_summary_table %>% inner_join(no_photos)
+
+output_summary_table=output_summary_table %>% 
+  inner_join(dist_sum)
+
 output_summary_table %>% 
   rename(.,"no_of_photos"="n")
 # You can write the table to .csv using this code below
-#write.csv(output_summary_table, "Summary_per_flight.csv")
+#write.csv(output_summary_table, "Summary_per_Flight.csv")
 ```
 
 ```{r}
@@ -421,13 +1116,11 @@ kableExtra::kable(output_summary_table) %>%
 
 ```{r}
 
-Export_2_excel=over %>% 
+Export_2_excel=all_dfs_reduced %>% 
   mutate(strip_width_1_side=strip_width)
 
 Export_2_excel$GSD=GSR_all_dfs$GSR
 
-Export_2_excel=Export_2_excel %>% 
-  dplyr::select(!c("v18","new_lat","new_lon",))# removes these coloumns as they are only used for calculating over values
 
 # You can write this table to excel by running this line (delete the "comment" '#' symbol)
 #write.csv(Export_2_excel, "Flight_data.csv")

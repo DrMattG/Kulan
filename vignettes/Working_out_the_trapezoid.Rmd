@@ -99,6 +99,55 @@ p+geom_polygon(
 
 ```
 
+## Adding the other camera
+
+In our case we have two cameras with different angles and we can plot these to show the images horizontal footprints.
+
+```{r}
+theta2 <- deg2rad(25.7)
+Dc2= h*tan(theta2-phi/2)
+Df2= h*tan(theta2+phi/2)
+Dm2= h*tan(theta2+phi*0.5/2)
+
+dt.triangle <- data.table(group = c(1,1,1), polygon.x = c(0,Dc,0), polygon.y = c(h,0,0))
+dt.triangle2 <- data.table(group = c(1,1,1), polygon.x = c(0,Df,0), polygon.y = c(h,0,0))
+
+dt.triangle3 <- data.table(group = c(2,2,2), polygon.x3 = c(0,-Dc2,0), polygon.y3 = c(h,0,0))
+dt.triangle3 <- data.table(group = c(2,2,2), polygon.x3 = c(0,-Df2,0), polygon.y3 = c(h,0,0))
+
+
+p <- ggplot()
+p <- p + geom_polygon(
+  data = dt.triangle
+  ,aes(
+    x=polygon.x
+    ,y=polygon.y
+    ,group=group
+  )
+)
+p<-p+geom_polygon(
+  data = dt.triangle2
+  ,aes(
+    x=polygon.x
+    ,y=polygon.y
+    ,group=group
+    , alpha=0.2
+  ))
+p+geom_polygon(
+  data = dt.triangle3
+  ,aes(
+    x=polygon.x3
+    ,y=polygon.y3
+    ,group=group
+    , alpha=0.2
+  ))+
+  labs(x="Horizontal distance", y="Vertical distance")+
+  theme(legend.position = "None")
+```
+
+
+
+
 ## Projecting the camera to the trapezoid
 
 To develop the trapezoid of the camera we need to look at Figure 1b. $\omega$ refers to the horizontal field of view. 

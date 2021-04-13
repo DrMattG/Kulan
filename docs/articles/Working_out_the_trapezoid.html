@@ -157,16 +157,62 @@
   <span class="fu">labs</span><span class="op">(</span>x<span class="op">=</span><span class="st">"Horizontal distance"</span>, y<span class="op">=</span><span class="st">"Vertical distance"</span><span class="op">)</span><span class="op">+</span>
   <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"None"</span><span class="op">)</span></code></pre></div>
 <p><img src="Working_out_the_trapezoid_files/figure-html/unnamed-chunk-5-1.png" width="700"></p>
+<div id="adding-the-other-camera" class="section level2">
+<h2 class="hasAnchor">
+<a href="#adding-the-other-camera" class="anchor"></a>Adding the other camera</h2>
+<p>In our case we have two cameras with different angles and we can plot these to show the images horizontal footprints.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">theta2</span> <span class="op">&lt;-</span> <span class="fu">deg2rad</span><span class="op">(</span><span class="fl">25.7</span><span class="op">)</span>
+<span class="va">Dc2</span><span class="op">=</span> <span class="va">h</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html">tan</a></span><span class="op">(</span><span class="va">theta2</span><span class="op">-</span><span class="va">phi</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span>
+<span class="va">Df2</span><span class="op">=</span> <span class="va">h</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html">tan</a></span><span class="op">(</span><span class="va">theta2</span><span class="op">+</span><span class="va">phi</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span>
+<span class="va">Dm2</span><span class="op">=</span> <span class="va">h</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html">tan</a></span><span class="op">(</span><span class="va">theta2</span><span class="op">+</span><span class="va">phi</span><span class="op">*</span><span class="fl">0.5</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span>
+
+<span class="va">dt.triangle</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html">data.table</a></span><span class="op">(</span>group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span>, polygon.x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="va">Dc</span>,<span class="fl">0</span><span class="op">)</span>, polygon.y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">h</span>,<span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span>
+<span class="va">dt.triangle2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html">data.table</a></span><span class="op">(</span>group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span>, polygon.x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="va">Df</span>,<span class="fl">0</span><span class="op">)</span>, polygon.y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">h</span>,<span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span>
+
+<span class="va">dt.triangle3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html">data.table</a></span><span class="op">(</span>group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">2</span>,<span class="fl">2</span><span class="op">)</span>, polygon.x3 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="op">-</span><span class="va">Dc2</span>,<span class="fl">0</span><span class="op">)</span>, polygon.y3 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">h</span>,<span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span>
+<span class="va">dt.triangle3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html">data.table</a></span><span class="op">(</span>group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">2</span>,<span class="fl">2</span><span class="op">)</span>, polygon.x3 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="op">-</span><span class="va">Df2</span>,<span class="fl">0</span><span class="op">)</span>, polygon.y3 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">h</span>,<span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span>
+
+
+<span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="op">)</span>
+<span class="va">p</span> <span class="op">&lt;-</span> <span class="va">p</span> <span class="op">+</span> <span class="fu">geom_polygon</span><span class="op">(</span>
+  data <span class="op">=</span> <span class="va">dt.triangle</span>
+  ,<span class="fu">aes</span><span class="op">(</span>
+    x<span class="op">=</span><span class="va">polygon.x</span>
+    ,y<span class="op">=</span><span class="va">polygon.y</span>
+    ,group<span class="op">=</span><span class="va">group</span>
+  <span class="op">)</span>
+<span class="op">)</span>
+<span class="va">p</span><span class="op">&lt;-</span><span class="va">p</span><span class="op">+</span><span class="fu">geom_polygon</span><span class="op">(</span>
+  data <span class="op">=</span> <span class="va">dt.triangle2</span>
+  ,<span class="fu">aes</span><span class="op">(</span>
+    x<span class="op">=</span><span class="va">polygon.x</span>
+    ,y<span class="op">=</span><span class="va">polygon.y</span>
+    ,group<span class="op">=</span><span class="va">group</span>
+    , alpha<span class="op">=</span><span class="fl">0.2</span>
+  <span class="op">)</span><span class="op">)</span>
+<span class="va">p</span><span class="op">+</span><span class="fu">geom_polygon</span><span class="op">(</span>
+  data <span class="op">=</span> <span class="va">dt.triangle3</span>
+  ,<span class="fu">aes</span><span class="op">(</span>
+    x<span class="op">=</span><span class="va">polygon.x3</span>
+    ,y<span class="op">=</span><span class="va">polygon.y3</span>
+    ,group<span class="op">=</span><span class="va">group</span>
+    , alpha<span class="op">=</span><span class="fl">0.2</span>
+  <span class="op">)</span><span class="op">)</span><span class="op">+</span>
+  <span class="fu">labs</span><span class="op">(</span>x<span class="op">=</span><span class="st">"Horizontal distance"</span>, y<span class="op">=</span><span class="st">"Vertical distance"</span><span class="op">)</span><span class="op">+</span>
+  <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"None"</span><span class="op">)</span></code></pre></div>
+<p><img src="Working_out_the_trapezoid_files/figure-html/unnamed-chunk-6-1.png" width="700"></p>
+</div>
 <div id="projecting-the-camera-to-the-trapezoid" class="section level2">
 <h2 class="hasAnchor">
 <a href="#projecting-the-camera-to-the-trapezoid" class="anchor"></a>Projecting the camera to the trapezoid</h2>
 <p>To develop the trapezoid of the camera we need to look at Figure 1b. <span class="math inline">\(\omega\)</span> refers to the horizontal field of view.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">Wc</span><span class="op">=</span><span class="fl">2</span><span class="op">*</span><span class="op">(</span><span class="va">Dc</span><span class="op">^</span><span class="fl">2</span><span class="op">+</span><span class="va">h</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">^</span><span class="fl">0.5</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html">tan</a></span><span class="op">(</span><span class="va">omega</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span>
 <span class="va">Wm</span><span class="op">=</span><span class="fl">2</span><span class="op">*</span><span class="op">(</span><span class="op">(</span><span class="va">Dc</span><span class="op">+</span><span class="va">Df</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">+</span><span class="va">h</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">^</span><span class="fl">0.5</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html">tan</a></span><span class="op">(</span><span class="va">omega</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span>
 <span class="va">Wf</span><span class="op">=</span><span class="fl">2</span><span class="op">*</span><span class="op">(</span><span class="va">Df</span><span class="op">^</span><span class="fl">2</span><span class="op">+</span><span class="va">h</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">^</span><span class="fl">0.5</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html">tan</a></span><span class="op">(</span><span class="va">omega</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span></code></pre></div>
 <p>Again we can attempt to recreate the image from Figure 1b</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">positions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>
  x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="va">Df</span><span class="op">-</span><span class="va">Dc</span>, <span class="va">Df</span><span class="op">-</span><span class="va">Dc</span><span class="op">)</span>,
   y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="va">Wc</span><span class="op">/</span><span class="fl">2</span>, <span class="va">Wc</span><span class="op">/</span><span class="fl">2</span>, <span class="op">-</span><span class="va">Wf</span><span class="op">/</span><span class="fl">2</span>, <span class="va">Wf</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span>
@@ -176,7 +222,7 @@
   <span class="fu">labs</span><span class="op">(</span>x<span class="op">=</span><span class="st">""</span>, y<span class="op">=</span><span class="st">""</span><span class="op">)</span><span class="op">+</span>
   <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span><span class="op">+</span>
   <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"None"</span><span class="op">)</span></code></pre></div>
-<p><img src="Working_out_the_trapezoid_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
+<p><img src="Working_out_the_trapezoid_files/figure-html/unnamed-chunk-8-1.png" width="700"></p>
 </div>
   </div>
 
