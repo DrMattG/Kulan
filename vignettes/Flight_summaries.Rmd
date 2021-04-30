@@ -311,7 +311,7 @@ all_dfs_reduced %>%
 
 The forward overlap is the percentage overlap that two consecutive images have. To calculate this value we could not use a single function so have developed a script to follow the process. This is hidden here in the rendered Markdown but contained in the script.
 
-```{r, echo=FALSE}
+```{r, echo=TRUE,message=FALSE,results="hide"}
 overlap_df=distance_df %>% 
   select(photo_no, alt_above_ground, coord_dif, banking_angle, Flight)
 
