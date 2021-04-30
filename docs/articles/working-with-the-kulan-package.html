@@ -136,7 +136,8 @@
 <span class="co">#&gt;          Dc      Dm       Df       Rc       Rm       Rf       Wc       Wm</span>
 <span class="co">#&gt; 1 -7.641924 182.786 293.5991 230.3268 293.9435 373.0851 157.9384 184.4519</span>
 <span class="co">#&gt;         Wf</span>
-<span class="co">#&gt; 1 255.8298</span></code></pre></div>
+<span class="co">#&gt; 1 255.8298</span>
+<span class="co">#&gt; Warning: package 'patchwork' was built under R version 4.0.5</span></code></pre></div>
 <p><img src="working-with-the-kulan-package_files/figure-html/unnamed-chunk-3-1.png" width="700"></p>
 </div>
 <div id="abundance-estimators" class="section level3">
@@ -212,8 +213,8 @@
 <hr>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/jolly2.html">jolly2</a></span><span class="op">(</span>species_count <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">sp_count</span>, Transect_area <span class="op">=</span> <span class="va">data</span><span class="op">$</span><span class="va">Trans_area</span>,Z<span class="op">=</span><span class="fl">164</span><span class="op">*</span><span class="fl">5</span><span class="op">)</span>
-<span class="co">#&gt;   Estimate lower_CI upper_CI      SE mean.y     SD.y Coef.of.Var.y</span>
-<span class="co">#&gt; 1 2189.476 1895.755 2483.198 176.899  10.91 12.46092      1.142156</span></code></pre></div>
+<span class="co">#&gt;   Estimate lower_CI upper_CI       SE mean.y     SD.y Coef.of.Var.y</span>
+<span class="co">#&gt; 1 2651.497 2333.513 2969.481 191.5116  12.96 12.24161     0.9445685</span></code></pre></div>
 <p><strong>Run the n-mixture model</strong></p>
 <p>Finally, to run the n-mixture model you can use the run_kulan_model() function. See more details about this function using help().</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
