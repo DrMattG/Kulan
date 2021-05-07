@@ -120,7 +120,7 @@ dfs_reduced %>%
 
 ```
 
-##  5.2. Trapeze - drone footprint for specific altitude example     
+##  Trapeze - drone footprint for specific altitude example     
 
 ```{r}
 
