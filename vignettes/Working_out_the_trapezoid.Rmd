@@ -27,10 +27,10 @@ deg2rad=function(d){
 
 ```
 
-For this example the altitude of the drone is 200m, the angle of the camera is 25 degrees
+For this example the altitude of the drone is 245m, the angle of the camera is 25 degrees
 
 ```{r}
-h=200
+h=245
 # angle of camera
 # 25 degrees
 theta <- deg2rad(25)

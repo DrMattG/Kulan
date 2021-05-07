@@ -19,7 +19,7 @@ library(geosphere)
 ```
 
 
-## Gather all the Flights in to a single dataset
+## Call in files from a nested folder and clean them
 
 ```{r make a large dataset, echo=TRUE, message=FALSE, warning=FALSE}
 library(here)
@@ -31,131 +31,32 @@ all_dfs=all_dfs %>%
   janitor::clean_names() %>% 
   rename(., Flight = class)
 
+#clean up the time format if needed (some issues with xls files)
+# all_dfs <- all_dfs %>%
+#             mutate(time = update(time,
+#                        year = year(date),
+#                        month = month(date),
+#                        day = day(date)),
+#             hms = hms::as_hms(time))
+
+#Make sure values are recognized as numeric
+all_dfs=all_dfs %>%
+  mutate(banking_angle=as.numeric(banking_angle)) %>%
+  mutate(tangage=as.numeric(tangage)) %>%
+  mutate(azimuth=as.numeric(azimuth)) %>%
+  mutate(gps_course=as.numeric(gps_course)) %>%
+  mutate(speed=as.numeric(speed)) %>%
+  mutate(gps_speed=as.numeric(gps_speed))
+
+#shows if values are correctly defined
+str(all_dfs)
+
 
 ```
 
-## Draw the flight paths for all flights
-
-```{r}
-library(leaflet)
-pal <- colorFactor(
-  palette = 'Dark2',
-  domain = all_dfs$Flight
-)
-
-
-leaflet(data=all_dfs[,c(5,4, 18)]) %>% 
-  addTiles() %>% 
-  addCircleMarkers(lng=~lon_dec, lat=~lat_dec, radius=2, color = ~pal(Flight))
-```
-
-
-## Draw the flight paths for each flight
-
-```{r}
-library(leaflet)
-ldat1=all_dfs %>% 
-  filter(Flight=="Flight1")
-leaflet(data=ldat1[,c(5,4)]) %>% 
-  addTiles() %>% 
-  addCircleMarkers(lng=~lon_dec, lat=~lat_dec, radius=2)
-```
-
-```{r}
-library(leaflet)
-ldat1=all_dfs %>% 
-  filter(Flight=="Flight2")
-leaflet(data=ldat1[,c(5,4)]) %>% 
-  addTiles() %>% 
-  addCircleMarkers(lng=~lon_dec, lat=~lat_dec, radius=2)
-```
-
-
-```{r}
-library(leaflet)
-ldat1=all_dfs %>% 
-  filter(Flight=="Flight3")
-leaflet(data=ldat1[,c(5,4)]) %>% 
-  addTiles() %>% 
-  addCircleMarkers(lng=~lon_dec, lat=~lat_dec, radius=2)
-```
-
-
-
-```{r}
-library(leaflet)
-ldat1=all_dfs %>% 
-  filter(Flight=="Flight4")
-leaflet(data=ldat1[,c(5,4)]) %>% 
-  addTiles() %>% 
-  addCircleMarkers(lng=~lon_dec, lat=~lat_dec, radius=2)
-```
-
-
-```{r}
-library(leaflet)
-ldat1=all_dfs %>% 
-  filter(Flight=="Flight5")
-leaflet(data=ldat1[,c(5,4)]) %>% 
-  addTiles() %>% 
-  addCircleMarkers(lng=~lon_dec, lat=~lat_dec, radius=2)
-```
-
-
-
-```{r}
-library(leaflet)
-ldat1=all_dfs %>% 
-  filter(Flight=="Flight6")
-leaflet(data=ldat1[,c(5,4)]) %>% 
-  addTiles() %>% 
-  addCircleMarkers(lng=~lon_dec, lat=~lat_dec, radius=2)
-```
-
-
-```{r}
-library(leaflet)
-ldat1=all_dfs %>% 
-  filter(Flight=="Flight7")
-leaflet(data=ldat1[,c(5,4)]) %>% 
-  addTiles() %>% 
-  addCircleMarkers(lng=~lon_dec, lat=~lat_dec, radius=2)
-```
-
-
-
-```{r}
-library(leaflet)
-ldat1=all_dfs %>% 
-  filter(Flight=="Flight8")
-leaflet(data=ldat1[,c(5,4)]) %>% 
-  addTiles() %>% 
-  addCircleMarkers(lng=~lon_dec, lat=~lat_dec, radius=2)
-```
-
+## Extract raster values from a DEM for the altitude above ground calculations
 
 At this point you could add the altitude from the DEM [see the "Getting raster values form a Digital Elevation Model" vignette]. Here, for this example, we will use the column called Altitude above the ground (*because we can not include all the DEMs we would need inside the package*).
-
-## Strip-width summary
-
-```{r, results='asis', echo=TRUE, message=FALSE, warning=FALSE}
- all_dfs=all_dfs%>% 
-    group_by(Flight) %>%
-  filter(!str_detect(photo_no, "IMG")) %>% # remove empty photos
-  rowwise() %>% 
-  mutate("strip_width"=get_strip_width(alt=alt_above_ground,banking_angle = banking_angle)) %>% 
-  drop_na(strip_width)
- our_summary1 <-
-  list("strip width" =
-         list("min"       = ~ round(min(strip_width)),
-              "max"       = ~ round(max(strip_width)),
-              "mean (sd)" = ~qwraps2::mean_sd(strip_width)))
-
-
-tab_1<-qwraps2::summary_table(dplyr::group_by(all_dfs, Flight),our_summary1)
-tab_1
-
-```
 
 ## Remove points where the drone is in take-off or landing
 
@@ -198,33 +99,18 @@ all_dfs %>%
 So a couple of points in Flight5 during the actual flight were below our threshold of 200m. So let's be conservative and go for 190m instead. You can change this threshold by changing the value in the code below.
 
 ```{r}
-all_dfs_reduced=all_dfs %>% 
+dfs_reduced=all_dfs %>% 
   filter(alt_above_ground>190)# The threshold is controlled here - change it by changing the number from 190
 ```
 
-Now all the points in consideration are above 190m.Let's re-run the strip-width summary.
+Now all the points in consideration are above 190m. 
 
-```{r, results='asis', echo=FALSE,, message=FALSE, warning=FALSE}
-all_dfs_reduced=all_dfs_reduced%>% 
-    group_by(Flight) %>%
-  filter(!str_detect(photo_no, "IMG")) %>% # remove empty photos
-  rowwise() %>% 
-  mutate("strip_width"=Kulan::get_strip_width(alt=alt_above_ground, banking_angle = banking_angle))
- our_summary2 <-
-  list("strip width" =
-         list("min"       = ~ round(min(strip_width)),
-              "max"       = ~ round(max(strip_width)),
-              "mean (sd)" = ~ qwraps2::mean_sd(strip_width)))
+## Drone flight descriptors     
 
-
-tab_1<-qwraps2::summary_table(dplyr::group_by(all_dfs_reduced, Flight),our_summary2)
-tab_1
-
-```
-## Altitude above ground summary
+### Altitude above ground summary
 
 ```{r}
-all_dfs_reduced %>% 
+dfs_reduced %>% 
    mutate(time2=as.POSIXct(time,format="%H:%M:%S")) %>% 
   ggplot(aes(time2,alt_above_ground))+
   geom_point(colour="darkblue")+
@@ -234,6 +120,182 @@ all_dfs_reduced %>%
 
 ```
 
+##  5.2. Trapeze - drone footprint for specific altitude example     
+
+```{r}
+
+#####################################################################################################################
+# Drone & camera setup:
+# Camera: SONY DCS-RX1RM2
+# Sensor: 35.9 x 24.0 mm
+# VIEWING ANGLE LENS (CORRESPONDING 35 MM FORMAT) 63 degrees (35mm))
+# Image width in pixel: 7952
+# Image height in pixel: 5304
+# Camera angles 25.7 and 25.0 degrees
+# distance between two lenses is 2,9-3,0 cm - this distance is in the forward direction 
+# as both cameras are directly in the middle of the drone
+#####################################################################################################################
+
+library(patchwork)
+#short version of the below functions:
+#Kulan::plot_trapezoid(altitude = 200, banking_angle = 0)
+
+# calculat trapez based on drone specifications
+# sensor and camera details
+xsensor	= 35.9   #sensor width
+ysensor	= 24     #sensor height
+focallen	= 35     #focal length of lens
+ygim     	= 0      #roll
+xgim1    = 25     #banking angle = camera angle 1
+Xgim2	= 25.7   #banking angle = camera angle 2
+alt      	= 245    #fight height - change according to values seen under 4.3., I subsequently changed alt = alt, so it 
+imW      = 7952   #sensor width
+imH	= 5304   #sensor length
+#####################################################################################################################
+#######################  5.2.1. trapeze side view
+#####################################################################################################################
+deg2rad<-function(d) {
+  rad = d * pi / 180
+  return(rad)
+}
+
+rad2deg<-function(rad) {
+  deg=rad*180/pi
+  return(deg)
+}
+
+FOV.wide<-rad2deg(2*atan(xsensor/(2*focallen)))
+FOV.high<-rad2deg(2*atan(ysensor/(2*focallen)))
+
+theta <- deg2rad(xgim1)
+# horizontal field of view
+phi <- deg2rad(FOV.wide)
+# vertical field of view
+omega <- deg2rad(FOV.high)
+
+Dc = alt*tan(theta-phi/2)
+Df = alt*tan(theta+phi/2)
+Dm = alt*tan(theta+phi*0.5/2)
+
+Rc = sqrt(alt^2+Dc^2)
+Rm = sqrt(alt^2+Dm^2)
+Rf = sqrt(alt^2+Df^2)
+
+dt.triangle  <- data.table(group = c(1,1,1), polygon.x = c(0,Dc,0), polygon.y = c(alt,0,0))
+dt.triangle2 <- data.table(group = c(1,1,1), polygon.x = c(0,Df,0), polygon.y = c(alt,0,0))
+
+#plotting side view
+p <- ggplot()
+p <- p + geom_polygon(
+  data = dt.triangle
+  ,aes(
+    x=polygon.x
+    ,y=polygon.y
+    ,group=group
+  )
+)
+p+geom_polygon(
+  data = dt.triangle2
+  ,aes(
+    x=polygon.x
+    ,y=polygon.y
+    ,group=group
+    , alpha=0.2
+  ))+
+  labs(x="Horizontal distance", y="Vertical distance")+
+  theme(legend.position = "None")
+
+
+
+```
+
+### Adding the other camera
+
+In our case we have two cameras with different angles and we can plot these to show the images horizontal footprints.
+```{r}
+
+theta2 <- deg2rad(Xgim2)
+Dc2 = alt*tan(theta2-phi/2)
+Df2 = alt*tan(theta2+phi/2)
+Dm2 = alt*tan(theta2+phi*0.5/2)
+
+dt.triangle  <- data.table(group = c(1,1,1), polygon.x = c(0,Dc,0), polygon.y = c(alt,0,0))
+dt.triangle2 <- data.table(group = c(1,1,1), polygon.x = c(0,Df,0), polygon.y = c(alt,0,0))
+
+dt.triangle3 <- data.table(group = c(2,2,2), polygon.x3 = c(0,-Dc2,0), polygon.y3 = c(alt,0,0))
+dt.triangle3 <- data.table(group = c(2,2,2), polygon.x3 = c(0,-Df2,0), polygon.y3 = c(alt,0,0))
+
+p <- ggplot()
+p <- p + geom_polygon(
+  data = dt.triangle
+  ,aes(
+    x=polygon.x
+    ,y=polygon.y
+    ,group=group
+  )
+)
+p<-p+geom_polygon(
+  data = dt.triangle2
+  ,aes(
+    x=polygon.x
+    ,y=polygon.y
+    ,group=group
+    , alpha=0.2
+  ))
+p+geom_polygon(
+  data = dt.triangle3
+  ,aes(
+    x=polygon.x3
+    ,y=polygon.y3
+    ,group=group
+    , alpha=0.2
+  ))+
+  labs(x="Horizontal distance", y="Vertical distance")+
+  theme(legend.position = "None")
+
+```
+
+##  Trapeze top view
+```{r}
+#Top view
+Wc = 2*(Dc^2+alt^2)^0.5*tan(omega/2)
+Wm = 2*((Dc+Df/2)^2+alt^2)^0.5*tan(omega/2)
+Wf = 2*(Df^2+alt^2)^0.5*tan(omega/2)
+
+positions <- data.frame(
+  x = c(0, 0, Df-Dc, Df-Dc),
+  y = c(-Wc/2, Wc/2, -Wf/2, Wf/2)
+)
+ggplot(positions[c(1,2,4,3),], aes(x = x, y = y)) +
+  geom_polygon(aes(fill = "red"))+
+  labs(x="", y="")+
+  theme_classic()+
+  theme(legend.position = "None")
+
+```
+
+
+
+## Strip-width summary
+
+```{r, results='asis', echo=TRUE, message=FALSE, warning=FALSE}
+ dfs_reduced=dfs_reduced%>% 
+    group_by(Flight) %>%
+  filter(!str_detect(photo_no, "IMG")) %>% # remove empty photos
+  rowwise() %>% 
+  mutate("strip_width"=get_strip_width(alt=alt_above_ground,banking_angle = banking_angle)) %>% 
+  drop_na(strip_width)
+ our_summary1 <-
+  list("strip width (m)" =
+         list("min"       = ~ round(min(strip_width)),
+              "max"       = ~ round(max(strip_width)),
+              "mean (sd)" = ~qwraps2::mean_sd(strip_width)))
+
+
+tab_1<-qwraps2::summary_table(dplyr::group_by(dfs_reduced, Flight),our_summary1)
+tab_1
+
+```
 
 ## Speed summary
 
@@ -241,7 +303,7 @@ Using the gps_speed we can plot the speed of the drone during each flight.
 
 ```{r}
 
-all_dfs_reduced%>% 
+dfs_reduced%>% 
   mutate(rowid=row_number()) %>% 
   mutate(time2=as.POSIXct(time,format="%H:%M:%S")) %>% 
   #ggplot(aes(time2,gps_speed))+# replace the next line with this to remove the alt_above_ground colour
@@ -259,7 +321,7 @@ all_dfs_reduced%>%
 There are some very large distances moved at the start or the end of a Flight and these need to be filtered out to allow us to plot the distance more clearly. Anything above 250m is therefore removed in the plotting code below.The points are coloured by the gps_speed. 
 
 ```{r}
-distance_df=all_dfs_reduced%>% 
+distance_df=dfs_reduced%>% 
   group_by(Flight) %>% 
   mutate(new_lat=lag(lat_dec)) %>%
   mutate(new_lon=lag(lon_dec)) %>%
@@ -270,7 +332,7 @@ distance_df %>%
   group_by(Flight) %>% 
    mutate(time2=as.POSIXct(time,format="%H:%M:%S")) %>% 
   filter(coord_dif<250) %>% 
-  ggplot(aes(time2,coord_dif,colour=gps_speed))+
+  ggplot(aes(time2,coord_dif,colour=coord_dif))+
   geom_point()+
   geom_line()+
   scale_colour_gradientn(colours = terrain.colors(10))+
@@ -282,7 +344,7 @@ distance_df %>%
 
 
 ```{r}
-all_dfs_reduced%>% 
+dfs_reduced%>% 
   mutate(rowid=row_number()) %>% 
   mutate(time2=as.POSIXct(time,format="%H:%M:%S")) %>% 
   ggplot(aes(time2,banking_angle))+
@@ -292,21 +354,40 @@ all_dfs_reduced%>%
   facet_wrap(~Flight, scales="free")
 ```
 
-## Photograph area
+## Photograph area on the right side
 
 ```{r}
-all_dfs_reduced=all_dfs_reduced %>% 
+dfs_reduced=dfs_reduced %>% 
   rowwise() %>% 
-  mutate("photo_area"=Kulan::get_photo_area(altitude = alt_above_ground,banking_angle = banking_angle))
+  mutate("photo_area_R"=Kulan::get_photo_area(altitude = alt_above_ground,banking_angle = banking_angle))
 
 
-all_dfs_reduced %>% 
-  dplyr::select(photo_area) %>% 
-  ggplot(aes(photo_area))+
+dfs_reduced %>% 
+  dplyr::select(photo_area_R) %>% 
+  ggplot(aes(photo_area_R))+
   labs(x="photograph area m2")+
   geom_histogram(fill="red")+
   theme_classic()
 ```
+
+## Photograph area on the left side
+
+We need to change the camera angle from the default (which is set for the right side camera) in order to calculate the photo area on the left.
+
+```{r}
+dfs_reduced=dfs_reduced %>% 
+  rowwise() %>% 
+  mutate("photo_area_L"=Kulan::get_photo_area(altitude = alt_above_ground, angle_of_camera = 25.7 ,banking_angle = banking_angle))
+
+
+dfs_reduced %>% 
+  dplyr::select(photo_area_L) %>% 
+  ggplot(aes(photo_area_L))+
+  labs(x="photograph area m2")+
+  geom_histogram(fill="red")+
+  theme_classic()
+```
+
 ## Overlap
 
 The forward overlap is the percentage overlap that two consecutive images have. To calculate this value we could not use a single function so have developed a script to follow the process. This is hidden here in the rendered Markdown but contained in the script.
@@ -990,7 +1071,7 @@ overlap_all=rbind(overlap_df1,overlap_df2,overlap_df3,overlap_df4,
 
 ```
 
-The mean overlap per Flight is
+The mean overlap per Flight is in m2.
 
 
 ```{r}
@@ -1011,14 +1092,14 @@ distance_df %>%
 
 ```
 
-## Side overlap
+## Side overlap in m
 
 ```{r}
-all_dfs_reduced=all_dfs_reduced %>% 
+dfs_reduced=dfs_reduced %>% 
   rowwise() %>% 
   mutate("side_overlap"=side_overlap(altitude = alt_above_ground, banking_angle = banking_angle))
 
-all_dfs_reduced %>%
+dfs_reduced %>%
   mutate(time=as.POSIXct(time,format="%H:%M:%S")) %>% 
   ggplot(aes(time,side_overlap)) + 
   geom_point(colour="darkblue")+
@@ -1027,11 +1108,11 @@ all_dfs_reduced %>%
 
 ```
 
-## Ground surface resolution
+## Ground surface resolution in cm/pixel
 
 
 ```{r}
-GSR_all_dfs=all_dfs_reduced %>% 
+GSR_all_dfs=dfs_reduced %>% 
   rowwise() %>%mutate("GSD_near"=Kulan::GSD(altitude = alt_above_ground
                                  )[1])%>%  mutate("GSD_mid"=Kulan::GSD(altitude = alt_above_ground)[2]) %>% mutate("GSD_far"=Kulan::GSD(altitude = alt_above_ground)[3])
 GSR_all_dfs %>% 
@@ -1040,7 +1121,7 @@ GSR_all_dfs %>%
 
 ```
 
-## Distance of each flight
+## Distance covered by each flight in KM
 
 ```{r}
 (dist_sum=distance_df %>% 
@@ -1054,52 +1135,55 @@ GSR_all_dfs %>%
 ### Flight summary table 
 
 ```{r}
-output_summary_table=all_dfs_reduced %>% 
-  group_by(Flight) %>% 
-  summarise(Date=min(date),  Time_start=min(time), Time_end=max(time), Mean_Altitude=mean(alt_above_ground, na.rm=TRUE), SD_Altitude=sd(alt_above_ground, na.rm=TRUE), Mean_GPS_Speed= mean(gps_speed, na.rm=TRUE),SD_GPS_Speed= sd(gps_speed, na.rm=TRUE), Mean_Banking= mean(banking_angle, na.rm=TRUE),SD_Banking= sd(banking_angle, na.rm=TRUE), Mean_Strip_Width=mean(strip_width, na.rm=TRUE), SD_Strip_width=sd(strip_width, na.rm=TRUE), Mean_side_overlap=mean(side_overlap, na.rm=TRUE), SD_side_overlap=sd(side_overlap,na.rm=TRUE), Mean_photo_area=mean(photo_area, na.rm=TRUE), SD_photo_area=sd(photo_area, na.rm=TRUE))
 
-over_sum=overlap_all %>% 
-  group_by(Flight) %>% 
-  summarise(Mean_Overlap=mean(forward_overlap, na.rm=TRUE), SD_Overlap=sd(forward_overlap, na.rm=TRUE))
+dfs_reduced<-dfs_reduced %>% inner_join(.,overlap_all)
 
-no_photos=all_dfs_reduced %>% 
+dfs_reduced$Rel_for_over <- (dfs_reduced$forward_overlap/dfs_reduced$photo_area_R)*100  # add relative forward overlap
+
+dfs_reduced<-dfs_reduced %>% inner_join(., GSR_all_dfs)
+
+no_photos=dfs_reduced %>% 
   group_by(Flight) %>% 
   tally()
 
-output_summary_table=output_summary_table %>% inner_join(over_sum, by=c("Flight"="Flight"))
+dfs_reduced<-dfs_reduced %>% inner_join(no_photos)
 
-output_summary_table=output_summary_table %>% inner_join(GSR_all_dfs)
 
-output_summary_table =output_summary_table %>% inner_join(no_photos)
+output_summary_table <- dfs_reduced %>% 
+  group_by(Flight) %>% 
+  summarise(Date=min(date), Time_start=min(time), Time_end=max(time), 
+            Mean_Altitude=mean(alt_above_ground, na.rm=TRUE), #SD_Altitude=sd(alt_above_ground, na.rm=TRUE), 
+            Mean_GPS_Speed=mean(gps_speed, na.rm=TRUE), #SD_GPS_Speed=sd(gps_speed, na.rm=TRUE),
+            Mean_GPS_dist=mean(coord_dif, na.rm=TRUE), #SD_coord_dif=sd(coord_dif, na.rm=TRUE),
+            Mean_Banking= mean(banking_angle, na.rm=TRUE), #SD_Banking=sd(banking_angle, na.rm=TRUE), 
+            Mean_Stripw_right=mean(strip_width, na.rm=TRUE), #SD_Stripw_right=sd(strip_width, na.rm=TRUE),
+            Mean_GSD_near=mean(unlist(GSD_near), na.rm=TRUE), Mean_GSD_mid=mean(unlist(GSD_mid), na.rm=TRUE), Mean_GSD_far=mean(unlist(GSD_far), na.rm=TRUE),
+            Mean_Photo_area_R=mean(photo_area_R, na.rm=TRUE), #SD_Photo_area=sd(photo_area, na.rm=TRUE)
+            Mean_Photo_area_L=mean(photo_area_L, na.rm=TRUE),#SD_Photo_area=sd(photo_area, na.rm=TRUE)
+            Mean_side_overlap=mean(side_overlap, na.rm=TRUE), #SD_side_overlap=sd(side_overlap, na.rm=TRUE)) 
+            Rel_side_overlap=(Mean_side_overlap/Mean_Stripw_right)*100, #% side overlap
+            Mean_for_overlap=mean(forward_overlap, na.rm=TRUE), #SD_forward_overlap=sd(forward_overlap, na.rm=TRUE)) 
+            Rel_for_overlap=(Mean_for_overlap/Mean_Photo_area_R)*100) #% forward overlap
 
-output_summary_table=output_summary_table %>% 
-  inner_join(dist_sum)
+no_photos <- dfs_reduced %>% 
+  group_by(Flight) %>%
+  tally()
 
-output_summary_table %>% 
-  rename(.,"no_of_photos"="n")
+names(no_photos)[2] <- "N_photos_right"
+
+output_summary_table <- output_summary_table %>% 
+                        inner_join(no_photos, by=c("Flight"="Flight"))
+
+output_summary_table %>% view()
 # You can write the table to .csv using this code below
 #write.csv(output_summary_table, "Summary_per_Flight.csv")
+
 ```
+
 
 ```{r}
 kableExtra::kable(output_summary_table) %>% 
   kableExtra::kable_styling()
 ```
 
-
-### Export to excel
-
-```{r}
-
-Export_2_excel=all_dfs_reduced %>% 
-  mutate(strip_width_1_side=strip_width)
-
-Export_2_excel$GSD=GSR_all_dfs$GSR
-
-
-# You can write this table to excel by running this line (delete the "comment" '#' symbol)
-#write.csv(Export_2_excel, "Flight_data.csv")
-
-
-```
 

@@ -104,9 +104,9 @@
   <span class="va">rad</span><span class="op">=</span><span class="va">d</span><span class="op">*</span><span class="va">pi</span><span class="op">/</span><span class="fl">180</span>
   <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">rad</span><span class="op">)</span>
 <span class="op">}</span></code></pre></div>
-<p>For this example the altitude of the drone is 200m, the angle of the camera is 25 degrees</p>
+<p>For this example the altitude of the drone is 245m, the angle of the camera is 25 degrees</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">h</span><span class="op">=</span><span class="fl">200</span>
+<code class="sourceCode R"><span class="va">h</span><span class="op">=</span><span class="fl">245</span>
 <span class="co"># angle of camera</span>
 <span class="co"># 25 degrees</span>
 <span class="va">theta</span> <span class="op">&lt;-</span> <span class="fu">deg2rad</span><span class="op">(</span><span class="fl">25</span><span class="op">)</span>
@@ -122,15 +122,15 @@
 <code class="sourceCode R"><span class="va">Dc</span><span class="op">=</span> <span class="va">h</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html">tan</a></span><span class="op">(</span><span class="va">theta</span><span class="op">-</span><span class="va">phi</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span>
 <span class="va">Df</span><span class="op">=</span> <span class="va">h</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html">tan</a></span><span class="op">(</span><span class="va">theta</span><span class="op">+</span><span class="va">phi</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span>
 <span class="va">Dm</span><span class="op">=</span> <span class="va">h</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html">tan</a></span><span class="op">(</span><span class="va">theta</span><span class="op">+</span><span class="va">phi</span><span class="op">*</span><span class="fl">0.5</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span></code></pre></div>
-<p>The horizontal distance visible to the camera is Df-Dc which in our case is 265.</p>
+<p>The horizontal distance visible to the camera is Df-Dc which in our case is 324.</p>
 <p>The distance from the drone to the closest (c), median (m) and furthest distance (f) is denoted as R in the figure and we can calculate this as follows:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">Rc</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">h</span><span class="op">^</span><span class="fl">2</span><span class="op">+</span><span class="va">Dc</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span>
 <span class="va">Rm</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">h</span><span class="op">^</span><span class="fl">2</span><span class="op">+</span><span class="va">Dm</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span>
 <span class="va">Rf</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">h</span><span class="op">^</span><span class="fl">2</span><span class="op">+</span><span class="va">Df</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></code></pre></div>
-<p>Rc=200.1408921</p>
-<p>Rm=255.8223187</p>
-<p>Rf=325.9471745</p>
+<p>Rc=245.1725928</p>
+<p>Rm=313.3823404</p>
+<p>Rf=399.2852888</p>
 <p>Here is a schematic plot of our data to attempt to match Figure 1a.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://Rdatatable.gitlab.io/data.table">data.table</a></span><span class="op">)</span>
